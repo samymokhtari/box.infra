@@ -1,0 +1,26 @@
+name: Terraform CD
+on:
+  push:
+    branches: [main]
+
+env:
+    TF_VAR_region: ${{ vars.REGION }}
+    TF_VAR_project_id: ${{ vars.PROJECT_ID }}
+    TF_VAR_env: "production"
+    TF_VAR_ssh_user: ${{ secrets.SSH_USER }}
+    TF_VAR_ssh_public_key: ${{ secrets.SSH_PUBLIC_KEY }}
+
+jobs:
+    apply:
+        runs-on: ubuntu-latest
+        container: hashicorp/terraform
+        steps:
+            - uses: actions/checkout@v4
+            - name: 'Authenticate to Google Cloud'
+              uses: 'google-github-actions/auth@v1'
+              with:
+                credentials_json: '${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}'
+            - name: Terraform Init
+              run: terraform init -upgrade
+            - name: Terraform Apply
+              run: terraform apply -input=false -auto-approve -lock=false
