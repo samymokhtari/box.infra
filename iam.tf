@@ -20,3 +20,11 @@ resource "google_storage_bucket_iam_member" "gce-storage" {
   role   = "roles/storage.admin"
   member = "serviceAccount:${google_service_account.sa.email}"
 }
+
+resource "google_compute_instance_iam_member" "gce-compute" {
+  project = google_compute_instance.default.project
+  zone = google_compute_instance.default.zone
+  instance_name = google_compute_instance.default.name
+  role = "roles/compute.osLogin"
+  member = "serviceAccount:${google_service_account.sa.email}"
+}

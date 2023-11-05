@@ -23,5 +23,9 @@ resource "google_compute_instance" "default" {
     network = google_compute_network.vpc_network.name
   }
 
-  metadata_startup_script = "sudo apt-get update -y && sudo apt-get upgrade -y && sudo echo ${var.ssh_public_key} >> ~/.ssh/authorized_keys"
+  metadata_startup_script = "sudo apt-get update -y && sudo apt-get upgrade -y"
+
+  depends_on = [
+    google_project_service.compute
+  ]
 }

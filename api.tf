@@ -9,3 +9,7 @@ resource "google_project_service" "iam" {
 resource "google_project_service" "cloudrun" {
   service = "run.googleapis.com"
 }
+
+resource "google_project_service" "compute" {
+  service = "compute.googleapis.com"
+}
