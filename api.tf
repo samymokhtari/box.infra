@@ -17,3 +17,7 @@ resource "google_project_service" "compute" {
 resource "google_project_service" "secret" {
   service = "secretmanager.googleapis.com"
 }
+
+resource "google_project_service" "vpsaccess" {
+  service = "vpcaccess.googleapis.com"
+}
