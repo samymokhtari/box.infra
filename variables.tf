@@ -42,3 +42,13 @@ variable "ssh_public_key" {
   type        = string
   description = "SSH Public Key"
 }
+
+variable "gcp_credentials" {
+  type        = string
+  description = "GCP Credentials in JSON format"
+}
+
+variable "conn_str_sql" {
+  type        = string
+  description = "Connection String to SQL Database"
+}

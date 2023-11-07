@@ -13,3 +13,7 @@ resource "google_project_service" "cloudrun" {
 resource "google_project_service" "compute" {
   service = "compute.googleapis.com"
 }
+
+resource "google_project_service" "secret" {
+  service = "secretmanager.googleapis.com"
+}

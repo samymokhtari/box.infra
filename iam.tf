@@ -22,9 +22,9 @@ resource "google_storage_bucket_iam_member" "gce-storage" {
 }
 
 resource "google_compute_instance_iam_member" "gce-compute" {
-  project = google_compute_instance.default.project
-  zone = google_compute_instance.default.zone
+  project       = google_compute_instance.default.project
+  zone          = google_compute_instance.default.zone
   instance_name = google_compute_instance.default.name
-  role = "roles/compute.osLogin"
-  member = "serviceAccount:${google_service_account.sa.email}"
+  role          = "roles/compute.osLogin"
+  member        = "serviceAccount:${google_service_account.sa.email}"
 }
