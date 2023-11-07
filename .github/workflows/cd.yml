@@ -1,7 +1,7 @@
 name: Terraform CD
 on:
   push:
-    branches: [main]
+    branches: [main, fix/cd]
 
 env:
     TF_VAR_region: ${{ vars.REGION }}
