@@ -1,4 +1,4 @@
-name: Terraform CI
+name: Terraform CI GCP
 on:
   pull_request:
     types: [opened, reopened, synchronize]
