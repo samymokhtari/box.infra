@@ -2,7 +2,7 @@ name: Terraform CI
 on:
   pull_request:
     types: [opened, reopened, synchronize]
-    branches: [main]
+    branches: [google]
   release:
     types: [published]
 

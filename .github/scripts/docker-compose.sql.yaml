@@ -1,3 +1,4 @@
+# docker-compose.yml for any database you want to use on the compute instance "vm-sql"
 version: "3.9"
 
 name: box
@@ -6,26 +7,26 @@ services:
   sqlserver:
     container_name: sqlserver
     user: root
-    image: azure-sql-edge:latest
+    image: mcr.microsoft.com/mssql/server # OR azure-sql-edge:latest
     ports:
       - "1433:1433"
     environment:
-      SA_PASSWORD: "rEUommcypCz5UQn"
-      ACCEPT_EULA: "Y"
+      - "SA_PASSWORD=rEUommcypCz5UQn1"
+      - "ACCEPT_EULA=Y"
     volumes:
       - sqlserver:/var/opt/mssql/
     networks:
       - net1
 
-  mysql:
-    container_name: mysql
+  mariadb:
+    container_name: mariadb
     image: mariadb:latest
     restart: always
     volumes:
-      - mysql:/var/lib/mysql
+      - mariadb:/var/lib/mysql
     environment:
-      MARIADB_ROOT_USERNAME: sa
-      MARIADB_ROOT_PASSWORD: rEUommcypCz5UQn
+      - "MARIADB_ROOT_USERNAME=sa"
+      - "MARIADB_ROOT_PASSWORD=PASSWORD"
     ports:
       - '3306:3306'
     networks:
@@ -47,5 +48,5 @@ networks:
 volumes:
   sqlserver:
    driver: local
-  mysql:
+  mariadb:
    driver: local

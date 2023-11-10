@@ -50,12 +50,12 @@ resource "google_compute_firewall" "default" {
   allow {
     protocol = "icmp"
   }
-  
+
   allow {
     protocol = "tcp"
     ports    = ["22", "3306", "1433"]
   }
-  target_tags = [var.compute_instance_name]
+  target_tags   = [var.compute_instance_name]
   source_ranges = ["0.0.0.0/0"]
 }
   
