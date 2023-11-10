@@ -1,11 +1,15 @@
 resource "google_compute_instance" "default" {
-  name         = var.compute_instance_name
-  machine_type = "f1-micro"
-  zone         = "${var.region}-b"
+  name                      = var.compute_instance_name
+  machine_type              = "e2-micro"
+  zone                      = "${var.region}-b"
+  description               = "Instance for ${var.env} environment"
+  hostname                  = "${var.compute_instance_name}.${var.env}.internal"
+  allow_stopping_for_update = true
 
-  tags = values(local.tags)
+  tags = [var.env, var.compute_instance_name]
 
   boot_disk {
+    auto_delete = false
     initialize_params {
       image = "debian-cloud/debian-11"
       labels = {
@@ -20,10 +24,20 @@ resource "google_compute_instance" "default" {
   }
 
   network_interface {
-    network = google_compute_network.vpc_network.name
+    subnetwork = google_compute_subnetwork.subnet.self_link
+    access_config {
+      nat_ip       = google_compute_address.static.address
+      network_tier = "STANDARD"
+    }
   }
 
-  metadata_startup_script = "sudo apt-get update -y && sudo apt-get upgrade -y"
+  service_account {
+    email = google_service_account.sa.email
+    scopes = [
+      "https://www.googleapis.com/auth/cloud-platform",
+      "https://www.googleapis.com/auth/sqlservice.admin"
+    ]
+  }
 
   depends_on = [
     google_project_service.compute

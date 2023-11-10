@@ -37,10 +37,22 @@ variable "ssh_user" {
   description = "SSH User"
 }
 
-variable "private_subnet_cidr" {
+variable "public_ip_range" {
   type        = string
-  description = "Private IP Cidr"
-  default     = "10.132.0.0/28"
+  description = "IP Cidr Range"
+  default     = "10.2.0.0/28"
+}
+
+variable "private_ip_range" {
+  type        = string
+  description = "IP Cidr Range"
+  default     = "192.168.0.0/28"
+}
+
+variable "vpc_connector_ip_range" {
+  type        = string
+  description = "IP Cidr Range"
+  default     = "10.2.0.16/28"
 }
 
 variable "ssh_public_key" {
