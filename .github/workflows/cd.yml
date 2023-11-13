@@ -23,7 +23,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
           source: ${{ env.script_install }}
-          target: /home/${{ secrets.SSH_USERNAME }}/${{ env.script_install }}
+          target: /home/${{ secrets.SSH_USERNAME }}
 
       - name: Copy Docker Compose via ssh
         uses: appleboy/scp-action@v0.1.4
@@ -33,7 +33,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
           source: ${{ env.dockercompose }}
-          target: /home/${{ secrets.SSH_USERNAME }}/${{ env.dockercompose }}
+          target: /home/${{ secrets.SSH_USERNAME }}
 
       - name: Setup Machine
         uses: appleboy/ssh-action@v1.0.0
