@@ -1,28 +1,55 @@
-name: Terraform CD
+name: On-Premise CD
 on:
   push:
-    branches: [main]
+    branches: [on-premise]
 
 env:
-    TF_VAR_region: ${{ vars.REGION }}
-    TF_VAR_project_id: ${{ vars.PROJECT_ID }}
-    TF_VAR_env: "production"
-    TF_VAR_ssh_user: ${{ secrets.SSH_USER }}
-    TF_VAR_ssh_public_key: ${{ secrets.SSH_PUBLIC_KEY }}
-    TF_VAR_gcp_credentials: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
-    TF_VAR_conn_str_sql: ${{ secrets.CONN_STR_SQL }}
+  env: "production"
+  dockercompose: "./docker-compose.yml"
+  script_install: "./script_install.sh"
 
 jobs:
-    apply:
-        runs-on: ubuntu-latest
-        container: hashicorp/terraform
-        steps:
-            - uses: actions/checkout@v4
-            - name: 'Authenticate to Google Cloud'
-              uses: 'google-github-actions/auth@v1'
-              with:
-                credentials_json: '${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}'
-            - name: Terraform Init
-              run: terraform init -upgrade
-            - name: Terraform Apply
-              run: terraform apply -input=false -auto-approve -lock=false
+  deploy:
+    environment: on-premise
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Copy Script Install via ssh
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          source: ${{ env.script_install }}
+          target: /home/${{ secrets.SSH_USERNAME }}/${{ env.script_install }}
+
+      - name: Copy Docker Compose via ssh
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          source: ${{ env.dockercompose }}
+          target: /home/${{ secrets.SSH_USERNAME }}/${{ env.dockercompose }}
+
+      - name: Setup Machine and Deploy Docker
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: /home/${{ secrets.SSH_USERNAME }}/${{ env.script_install }}
+
+      - name: Setup Machine and Deploy Docker
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: /home/${{ secrets.SSH_USERNAME }}/${{ env.dockercompose }}
+      
