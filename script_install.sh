@@ -1,17 +1,16 @@
 #!/bin/bash
 
-echo "Updating and upgrading the system..."
+echo "Updating the system..."
 sudo apt update -y
-sudo apt upgrade -y
-
-echo "Installing curl..."
-sudo apt install curl -y
 
 echo "Check if Docker is already installed..."
 if [ -f /tmp/docker_installed ]; then
     echo "Docker is already installed!"
     exit 0
 fi
+
+echo "Installing curl..."
+sudo apt install curl -y
 
 echo "Installing Docker..."
 
