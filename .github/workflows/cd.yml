@@ -5,8 +5,8 @@ on:
 
 env:
   env: "production"
-  dockercompose: "./docker-compose.yml"
-  script_install: "./script_install.sh"
+  dockercompose: "docker-compose.yml"
+  script_install: "script_install.sh"
 
 jobs:
   deploy:
@@ -35,7 +35,7 @@ jobs:
           source: ${{ env.dockercompose }}
           target: /home/${{ secrets.SSH_USERNAME }}/${{ env.dockercompose }}
 
-      - name: Setup Machine and Deploy Docker
+      - name: Setup Machine
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -44,7 +44,7 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           script: /home/${{ secrets.SSH_USERNAME }}/${{ env.script_install }}
 
-      - name: Setup Machine and Deploy Docker
+      - name: Deploy Docker
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.SSH_HOST }}
