@@ -1,4 +1,4 @@
-name: Terraform CI
+name: On-Premise CI
 on:
   pull_request:
     types: [opened, reopened, synchronize]
@@ -8,11 +8,19 @@ on:
 
 env:
   env: "production"
-  ssh_user: ${{ secrets.SSH_USER }}
-  ssh_public_key: ${{ secrets.SSH_PUBLIC_KEY }}
 
 jobs:
   checks:
+    environment: on-premise
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Test if SSH connection works
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script_stop: true
+          script: whoami
