@@ -7,7 +7,7 @@ services:
   azure-sql-edge:
     container_name: azure-sql-edge
     user: root
-    image: azure-sql-edge:latest # OR mcr.microsoft.com/mssql/server
+    image:  mcr.microsoft.com/azure-sql-edge:latest # OR mcr.microsoft.com/mssql/server
     ports:
       - "1433:1433"
     environment:

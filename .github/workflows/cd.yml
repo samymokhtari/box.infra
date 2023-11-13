@@ -1,7 +1,7 @@
 name: On-Premise CD
 on:
   push:
-    branches: [on-premise]
+    branches: [on-premise, fix/cd]
 
 env:
   env: "production"
@@ -11,14 +11,12 @@ env:
 
 jobs:
   deploy:
+    env:
+      FULLPATH: /home/${{ secrets.SSH_USERNAME }}/scripts
     environment: on-premise
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: "Set environmental variables"
-        run: |
-          echo "FULLPATH=/home/${{ secrets.SSH_USERNAME }}/${{ env.folder }}" >> $GITHUB_ENV
 
       - name: Copy Script Install via ssh
         uses: appleboy/scp-action@v0.1.4
@@ -28,8 +26,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
           source: ${{ env.script_install }}
-          target: $FULLPATH
-          rm: true
+          target: ${{ env.FULLPATH }}
 
       - name: Copy Docker Compose via ssh
         uses: appleboy/scp-action@v0.1.4
@@ -39,8 +36,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
           source: ${{ env.dockercompose }}
-          target: $FULLPATH
-          rm: true
+          target: ${{ env.FULLPATH }}
 
       - name: Give permissions
         uses: appleboy/ssh-action@v1.0.0
@@ -50,8 +46,16 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            chmod +x $FULLPATH/${{ env.script_install }}
-            chmod +x $FULLPATH/${{ env.dockercompose }}
+            chmod +x ${{ env.FULLPATH }}/${{ env.script_install }}
+            chmod +x ${{ env.FULLPATH }}/${{ env.dockercompose }}
+
+      - name: Set environments variable in a file
+        run: |
+          echo "ENV=${{ env.env }}"
+          echo "MSSQL_SA_PASSWORD=${{ secrets.DB_PASS }}"
+          echo "MARIADB_ROOT_USERNAME=${{ secrets.DB_USER }}"
+          echo "MARIADB_ROOT_PASSWORD=${{ secrets.DB_PASS }}"
+          
 
       - name: Setup Machine and Deploy Docker
         uses: appleboy/ssh-action@v1.0.0
@@ -61,12 +65,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            $FULLPATH/${{ env.script_install }}
+            ${{ env.FULLPATH }}/${{ env.script_install }}
             echo Starting Docker Compose
-            $FULLPATH/${{ env.dockercompose }} up -d \
-            -e ENV=${{ env.env }} \
-            -e MSSQL_SA_PASSWORD=${{ secrets.DB_PASS }} \
-            -e MARIADB_ROOT_USERNAME=${{ secrets.DB_USERNAME }} \
-            -e MARIADB_ROOT_PASSWORD=${{ secrets.DB_PASS }} \
-            --name box-db 
+            cd ${{ env.FULLPATH }} && sudo docker compose up -d
       
