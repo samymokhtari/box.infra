@@ -16,6 +16,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: "Set environmental variables"
+        run: |
+          echo "FULLPATH=/home/${{ secrets.SSH_USERNAME }}/${{ env.folder }}" >> $GITHUB_ENV
+
       - name: Copy Script Install via ssh
         uses: appleboy/scp-action@v0.1.4
         with:
@@ -24,7 +28,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
           source: ${{ env.script_install }}
-          target: /home/${{ secrets.SSH_USERNAME }}/${{ env.folder }}
+          target: $FULLPATH
           rm: true
 
       - name: Copy Docker Compose via ssh
@@ -35,7 +39,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
           source: ${{ env.dockercompose }}
-          target: /home/${{ secrets.SSH_USERNAME }}/${{ env.folder }}
+          target: $FULLPATH
           rm: true
 
       - name: Give permissions
@@ -46,24 +50,23 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            chmod +x /home/${{ secrets.SSH_USERNAME }}/${{ env.folder }}/${{ env.script_install }}
-            chmod +x /home/${{ secrets.SSH_USERNAME }}/${{ env.folder }}/${{ env.dockercompose }}
+            chmod +x $FULLPATH/${{ env.script_install }}
+            chmod +x $FULLPATH/${{ env.dockercompose }}
 
-      - name: Setup Machine
+      - name: Setup Machine and Deploy Docker
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
-          script: /home/${{ secrets.SSH_USERNAME }}/${{ env.script_install }}
-
-      - name: Deploy Docker
-        uses: appleboy/ssh-action@v1.0.0
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.SSH_PORT }}
-          script: /home/${{ secrets.SSH_USERNAME }}/${{ env.dockercompose }}
+          script: |
+            $FULLPATH/${{ env.script_install }}
+            echo Starting Docker Compose
+            $FULLPATH/${{ env.dockercompose }} up -d \
+            -e ENV=${{ env.env }} \
+            -e MSSQL_SA_PASSWORD=${{ secrets.DB_PASS }} \
+            -e MARIADB_ROOT_USERNAME=${{ secrets.DB_USERNAME }} \
+            -e MARIADB_ROOT_PASSWORD=${{ secrets.DB_PASS }} \
+            --name box-db 
       
