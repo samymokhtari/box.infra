@@ -7,6 +7,7 @@ env:
   env: "production"
   dockercompose: "docker-compose.yml"
   script_install: "script_install.sh"
+  folder: scripts
 
 jobs:
   deploy:
@@ -23,7 +24,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
           source: ${{ env.script_install }}
-          target: /home/${{ secrets.SSH_USERNAME }}
+          target: /home/${{ secrets.SSH_USERNAME }}/${{ env.folder }}
           rm: true
 
       - name: Copy Docker Compose via ssh
@@ -34,7 +35,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
           source: ${{ env.dockercompose }}
-          target: /home/${{ secrets.SSH_USERNAME }}
+          target: /home/${{ secrets.SSH_USERNAME }}/${{ env.folder }}
           rm: true
 
       - name: Give permissions
@@ -45,8 +46,8 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            chmod +x /home/${{ secrets.SSH_USERNAME }}/${{ env.script_install }}
-            chmod +x /home/${{ secrets.SSH_USERNAME }}/${{ env.dockercompose }}
+            chmod +x /home/${{ secrets.SSH_USERNAME }}/${{ env.folder }}/${{ env.script_install }}
+            chmod +x /home/${{ secrets.SSH_USERNAME }}/${{ env.folder }}/${{ env.dockercompose }}
 
       - name: Setup Machine
         uses: appleboy/ssh-action@v1.0.0
