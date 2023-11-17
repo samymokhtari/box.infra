@@ -4,17 +4,38 @@ version: "3.9"
 name: box
 
 services:
+  webserver:
+    container_name: webserver
+    user: root
+    image: nginx:latest
+    ports:
+      - 80:80
+      - 443:443
+    #restart: always
+    volumes:
+      - ./nginx/conf/:/etc/nginx/conf.d/:rw
+      - ./certbot/www:/var/www/certbot/:ro
+      - ./certbot/conf/:/etc/nginx/ssl/:ro
+    networks:
+      - net1
+
+  certbot:
+    image: certbot/certbot:latest
+    volumes:
+      - ./certbot/www/:/var/www/certbot/:rw
+      - ./certbot/conf/:/etc/letsencrypt/:rw
+
   api:
     container_name: api
     image: samy266/box:latest
     ports:
-      - "80:80"
-      - "443:443"
+      - 8080:80
     depends_on:
       - azure-sql-edge
+      - webserver
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
-      - ASPNETCORE_URLS=http://+:443;http://+:80
+      - ASPNETCORE_URLS=http://+:80
       - API_KEY=${BOX_API_KEY}
       - ConnStr=Server=azure-sql-edge;Database=box;User=sa;Password=${MSSQL_SA_PASSWORD};TrustServerCertificate=True;Encrypt=True;
     volumes:
@@ -31,7 +52,8 @@ services:
       - "1433:1433"
     environment:
       MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD} # example: yourStrong(!)Password
-      ACCEPT_EULA: Y
+      ACCEPT_EULA: 'Y'
+      MSSQL_PID: "Developer"
     volumes:
       - sqlserver:/var/opt/mssql/
     networks:
