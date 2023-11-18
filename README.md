@@ -21,3 +21,7 @@ https://mariadb.com/kb/en/container-backup-and-restoration/
 ## Setting up SSL certificate for nginx webserver
 
 https://mindsers.blog/en/post/https-using-nginx-certbot-docker/
+
+```bash
+sudo docker compose run --rm  certbot certonly --webroot --webroot-path /var/www/certbot/ -d example.com -d 'box.example.com' --cert-name example.com
+```

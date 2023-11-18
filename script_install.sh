@@ -12,6 +12,10 @@ fi
 echo "Installing curl..."
 sudo apt install curl -y
 
+
+echo "Installing net-tools..."
+sudo apt-get install net-tools -y
+
 echo "Installing Docker..."
 
 {
