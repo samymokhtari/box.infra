@@ -7,7 +7,9 @@ env:
   env: "production"
   dockercompose: "docker-compose.yml"
   script_install: "script_install.sh"
-  folder: scripts
+  nginx_conf: "nginx/conf/default.conf"
+  docker_usr: ${{ vars.DOCKER_USER }}
+  docker_pwd: ${{ secrets.DOCKER_PASSWORD }}
 
 jobs:
   deploy:
@@ -18,27 +20,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Copy Script Install via ssh
+      - name: Copy Script Install & Docker compose via ssh
         uses: appleboy/scp-action@v0.1.4
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
-          source: ${{ env.script_install }}
+          source: ${{ env.script_install }}, ${{ env.dockercompose }}, ${{ env.nginx_conf }}
+          overwrite : true
           target: ${{ env.FULLPATH }}
 
-      - name: Copy Docker Compose via ssh
-        uses: appleboy/scp-action@v0.1.4
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.SSH_PORT }}
-          source: ${{ env.dockercompose }}
-          target: ${{ env.FULLPATH }}
-
-      - name: Give permissions
+      - name: Give permissions to execute scripts
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -48,14 +41,27 @@ jobs:
           script: |
             chmod +x ${{ env.FULLPATH }}/${{ env.script_install }}
             chmod +x ${{ env.FULLPATH }}/${{ env.dockercompose }}
+            chmod +rwx ${{ env.FULLPATH }}/nginx
 
-      - name: Set environments variable in a file
-        run: |
-          echo "ENV=${{ env.env }}"
-          echo "MSSQL_SA_PASSWORD=${{ secrets.DB_PASS }}"
-          echo "MARIADB_ROOT_USERNAME=${{ secrets.DB_USER }}"
-          echo "MARIADB_ROOT_PASSWORD=${{ secrets.DB_PASS }}"
+      - name: Set environments variable in a file .env
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            cd ${{ env.FULLPATH }}
+            [ -e .env ] && rm .env
+            echo "ENV=${{ env.env }}" >> .env
+            echo "MSSQL_SA_PASSWORD=${{ secrets.DB_PASS }}" >> .env
+            echo "MARIADB_ROOT_USERNAME=${{ secrets.DB_USER }}" >> .env
+            echo "MARIADB_ROOT_PASSWORD=${{ secrets.DB_PASS }}" >> .env
+            echo "BOX_API_KEY=${{ secrets.BOX_API_KEY }}" >> .env
           
+      - name: Log to Docker Hub
+        run: |
+          docker login --username ${{ env.docker_usr }} --password ${{ env.docker_pwd }}
 
       - name: Setup Machine and Deploy Docker
         uses: appleboy/ssh-action@v1.0.0
@@ -66,6 +72,8 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           script: |
             ${{ env.FULLPATH }}/${{ env.script_install }}
-            echo Starting Docker Compose
-            cd ${{ env.FULLPATH }} && sudo docker compose up -d
+            echo Starting Docker Compose...
+            cd ${{ env.FULLPATH }} 
+            sudo docker compose up -d 
+            sudo docker restart webserver
       
