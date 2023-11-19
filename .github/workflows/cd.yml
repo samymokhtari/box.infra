@@ -73,5 +73,7 @@ jobs:
           script: |
             ${{ env.FULLPATH }}/${{ env.script_install }}
             echo Starting Docker Compose...
-            cd ${{ env.FULLPATH }} && sudo docker compose up -d --force-recreate
+            cd ${{ env.FULLPATH }} 
+            sudo docker compose up -d 
+            sudo docker restart webserver
       
