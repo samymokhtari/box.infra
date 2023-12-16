@@ -83,6 +83,16 @@ services:
     networks:
       - net1
 
+  grafana:
+    container_name: grafana
+    image: grafana/grafana
+    ports:
+      - 3000:3000
+    volumes:
+      - grafana:/var/lib/grafana
+    networks:
+      - net1
+
 networks:
   net1:
     name: net1
@@ -93,4 +103,6 @@ volumes:
   mariadb:
    driver: local
   box-files:
+   driver: local
+  grafana:
    driver: local
