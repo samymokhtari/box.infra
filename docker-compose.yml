@@ -16,6 +16,9 @@ services:
       - ./nginx/conf/:/etc/nginx/conf.d/:rw
       - ./certbot/www:/var/www/certbot/:ro
       - ./certbot/conf/:/etc/nginx/ssl/:ro
+    labels:
+      logging: "promtail"
+      logging_jobname: "containerlogs"
     networks:
       - net1
 
@@ -38,6 +41,9 @@ services:
       - ASPNETCORE_URLS=http://+:80
       - API_KEY=${BOX_API_KEY}
       - ConnStr=Server=azure-sql-edge;Database=box;User=sa;Password=${MSSQL_SA_PASSWORD};TrustServerCertificate=True;Encrypt=True;
+    labels:
+      logging: "promtail"
+      logging_jobname: "containerlogs"
     volumes:
       - box-files:/box/
     networks:
@@ -74,22 +80,36 @@ services:
     networks:
       - net1
 
-  adminer:
-    container_name: adminer
-    image: adminer
-    restart: always
-    ports:
-      - 8888:8080
-    networks:
-      - net1
-
   grafana:
     container_name: grafana
     image: grafana/grafana
     ports:
       - 3000:3000
     volumes:
+      - ./grafana/grafana-datasources.yml:/etc/grafana/provisioning/datasources/datasources.yaml
       - grafana:/var/lib/grafana
+    networks:
+      - net1
+
+  loki:
+    image: grafana/loki:latest
+    container_name: loki
+    ports:
+      - 3100:3100
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - net1
+  
+  promtail:
+    image: grafana/promtail:latest
+    container_name: promtail
+    volumes:
+      - ./grafana/promtail-config.yaml:/etc/promtail/docker-config.yaml
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: -config.file=/etc/promtail/promtail-config.yml
+    depends_on:
+      - loki
     networks:
       - net1
 
