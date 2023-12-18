@@ -8,6 +8,7 @@ env:
   dockercompose: "docker-compose.yml"
   script_install: "script_install.sh"
   nginx_conf: "nginx/conf/default.conf"
+  grafana_conf: "grafana/*.yml"
   docker_usr: ${{ vars.DOCKER_USER }}
   docker_pwd: ${{ secrets.DOCKER_PASSWORD }}
 
@@ -27,7 +28,7 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
-          source: ${{ env.script_install }}, ${{ env.dockercompose }}, ${{ env.nginx_conf }}
+          source: ${{ env.script_install }}, ${{ env.dockercompose }}, ${{ env.nginx_conf }}, ${{ env.grafana_conf }}
           overwrite : true
           target: ${{ env.FULLPATH }}
 
