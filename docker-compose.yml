@@ -104,7 +104,7 @@ services:
     image: grafana/promtail:latest
     container_name: promtail
     volumes:
-      - ./grafana/promtail-config.yaml:/etc/promtail/docker-config.yaml
+      - ./grafana/promtail-config.yml:/etc/promtail/docker-config.yaml
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
       - /var/run/docker.sock:/var/run/docker.sock
     command: -config.file=/etc/promtail/promtail-config.yml
