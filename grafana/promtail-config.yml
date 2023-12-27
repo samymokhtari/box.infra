@@ -12,7 +12,7 @@ scrape_configs:
   - job_name: muslimbot_log
     static_configs:
       - targets:
-          - loki
+          - localhost
         labels:
           job: muslimbot_logs
           __path__: /var/log/muslimbot/*.log
