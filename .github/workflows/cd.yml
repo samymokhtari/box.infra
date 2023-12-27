@@ -76,5 +76,5 @@ jobs:
             echo Starting Docker Compose...
             cd ${{ env.FULLPATH }} 
             sudo docker compose up -d --pull --remove-orphans
-            sudo docker exec -it webserver nginx -s reload
+            sudo docker exec  webserver nginx -s reload
       
