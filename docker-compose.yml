@@ -107,6 +107,7 @@ services:
       - ./grafana/promtail-config.yml:/etc/promtail/promtail-config.yml
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
       - /var/run/docker.sock:/var/run/docker.sock
+      - /var/log/muslimbot:/var/log/muslimbot
     command: -config.file=/etc/promtail/promtail-config.yml
     depends_on:
       - loki
