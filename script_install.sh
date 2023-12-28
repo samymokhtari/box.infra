@@ -33,7 +33,6 @@ echo "Installing Docker..."
 echo "Adding user to docker group..."
 sudo groupadd docker
 
-echo "Docker installed successfully!"dock
-
+echo "Docker installed successfully!"
 echo "Create a file to confirm the installation..."
 touch /tmp/docker_installed
