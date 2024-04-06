@@ -1,15 +1,11 @@
-name: Update nginx config
+name: Update docker-compose config
 
 on:
   workflow_dispatch:
-   inputs:
-      reload_nginx:
-        description: "If you want to reload nginx server (or not) ❓"
-        default: true
-        type: boolean
 
 env:
-   nginx_conf: "nginx/conf/default.conf"
+   dockercompose: "docker-compose.yml"
+
 
 jobs:
    update-nginx-config:
@@ -27,19 +23,18 @@ jobs:
            username: ${{ secrets.SSH_USERNAME }}
            key: ${{ secrets.SSH_PRIVATE_KEY }}
            port: ${{ secrets.SSH_PORT }}
-           source: ${{ env.nginx_conf }}
+           source: ${{ env.dockercompose }}
            overwrite : true
            target: ${{ env.FULLPATH }}
 
-      - name: Update nginx config
+      - name: Refresh Docker Compose
         uses: appleboy/ssh-action@v1.0.0
-        if: ${{ github.event.inputs.reload_nginx }} == 'true'
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            Restarting nginx server...
+            Refreshing docker-compose file...
             cd ${{ env.FULLPATH }} 
-            sudo docker exec  webserver nginx -s reload
+            sudo docker compose up -d --pull --remove-orphans
