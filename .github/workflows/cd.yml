@@ -58,6 +58,8 @@ jobs:
             echo "MSSQL_SA_PASSWORD=${{ secrets.DB_PASS }}" >> .env
             echo "MARIADB_ROOT_USERNAME=${{ secrets.DB_USER }}" >> .env
             echo "MARIADB_ROOT_PASSWORD=${{ secrets.DB_PASS }}" >> .env
+            echo "MARIADB_SONAR_USERNAME=${{ secrets.SONAR_DB_USER }}" >> .env
+            echo "MARIADB_SONAR_PASSWORD=${{ secrets.SONAR_DB_PASS }}" >> .env
             echo "BOX_API_KEY=${{ secrets.BOX_API_KEY }}" >> .env
           
       - name: Log to Docker Hub

@@ -23,10 +23,17 @@ services:
       - net1
 
   certbot:
+    container_name: certbot
+    depends_on:
+      - webserver
     image: certbot/certbot:latest
     volumes:
       - ./certbot/www/:/var/www/certbot/:rw
       - ./certbot/conf/:/etc/letsencrypt/:rw
+    command: >-
+             certonly --reinstall --webroot --webroot-path=/var/www/certbot
+             --email ${EMAIL} --agree-tos --no-eff-email
+             -d ${DOMAIN}
 
   api:
     container_name: api
@@ -138,6 +145,25 @@ services:
       - /var/log:/host/var/log:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
 
+  sonarqube:
+    image: sonarqube:latest
+    links:
+      - mariadb:db
+    ports:
+      - "9000:9000"
+    environment:
+      SONARQUBE_JDBC_USERNAME: ${MARIADB_SONAR_USERNAME}
+      SONARQUBE_JDBC_PASSWORD: ${MARIADB_SONAR_PASSWORD}
+      SONARQUBE_JDBC_URL: "jdbc:mysql://db:3306/sonar?useUnicode=true&amp;characterEncoding=utf8"
+    networks:
+      - net1
+    volumes:
+      - sonarqube/sonarqube_conf:/opt/sonarqube/conf
+      - sonarqube/sonarqube_data:/opt/sonarqube/data
+      - sonarqube/sonarqube_extensions:/opt/sonarqube/extensions
+      - sonarqube/sonarqube_logs:/opt/sonarqube/logs
+      - sonarqube/sonarqube_temp:/opt/sonarqube/temp
+
 networks:
   net1:
     name: net1
@@ -154,3 +180,5 @@ volumes:
   netdatalib:
   netdatacache:
   netdataconfig:
+  sonarqube:
+   driver: local
