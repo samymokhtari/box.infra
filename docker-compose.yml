@@ -158,11 +158,7 @@ services:
     networks:
       - net1
     volumes:
-      - sonarqube/sonarqube_conf:/opt/sonarqube/conf
-      - sonarqube/sonarqube_data:/opt/sonarqube/data
-      - sonarqube/sonarqube_extensions:/opt/sonarqube/extensions
-      - sonarqube/sonarqube_logs:/opt/sonarqube/logs
-      - sonarqube/sonarqube_temp:/opt/sonarqube/temp
+      - sonarqube:/opt/sonarqube
 
 networks:
   net1:
