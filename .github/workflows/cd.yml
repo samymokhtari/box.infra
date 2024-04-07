@@ -1,4 +1,7 @@
-name: On-Premise CD
+name: Continous Deployment
+run-name: "Deploy to ${{ github.env }} by @${{ github.actor }}"
+
+
 on:
   push:
     branches: [on-premise, fix/cd]

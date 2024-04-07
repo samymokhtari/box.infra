@@ -1,5 +1,5 @@
 # docker-compose.yml for any database you want to use on the compute instance "vm-sql"
-version: "3.9"
+version: "3.8"
 
 name: box
 
@@ -11,16 +11,16 @@ services:
     ports:
       - 80:80
       - 443:443
-    #restart: always
     volumes:
       - ./nginx/conf/:/etc/nginx/conf.d/:rw
-      - ./certbot/www:/var/www/certbot/:ro
-      - ./certbot/conf/:/etc/nginx/ssl/:ro
+      - ./certbot/www:/var/www/certbot/:rw
+      - ./certbot/conf/:/etc/nginx/ssl/:rw
+      - ./nginx/logs:/var/log/nginx/
     labels:
       logging: "promtail"
       logging_jobname: "containerlogs"
     networks:
-      - net1
+      - net_default
 
   certbot:
     container_name: certbot
@@ -28,18 +28,15 @@ services:
       - webserver
     image: certbot/certbot:latest
     volumes:
+      - ./certbot/var/www/letsencrypt:/var/www/letsencrypt:rw
       - ./certbot/www/:/var/www/certbot/:rw
       - ./certbot/conf/:/etc/letsencrypt/:rw
-    command: >-
-             certonly --reinstall --webroot --webroot-path=/var/www/certbot
-             --email ${EMAIL} --agree-tos --no-eff-email
-             -d ${DOMAIN}
+    networks:
+      - net_default
 
   api:
     container_name: api
     image: samy266/box:latest
-    ports:
-      - 8080:80
     depends_on:
       - azure-sql-edge
       - webserver
@@ -54,7 +51,7 @@ services:
     volumes:
       - box-files:/box/
     networks:
-      - net1
+      - net_default
 
   azure-sql-edge:
     container_name: azure-sql-edge
@@ -70,7 +67,7 @@ services:
     volumes:
       - sqlserver:/var/opt/mssql/
     networks:
-      - net1
+      - net_default
 
   mariadb:
     container_name: mariadb
@@ -85,18 +82,16 @@ services:
     ports:
       - '3306:3306'
     networks:
-      - net1
+      - net_default
 
   grafana:
     container_name: grafana
     image: grafana/grafana
-    ports:
-      - 3000:3000
     volumes:
       - ./grafana/grafana-datasources.yml:/etc/grafana/provisioning/datasources/datasources.yaml
       - grafana:/var/lib/grafana
     networks:
-      - net1
+      - net_default
 
   loki:
     image: grafana/loki:latest
@@ -105,7 +100,7 @@ services:
       - 3100:3100
     command: -config.file=/etc/loki/local-config.yaml
     networks:
-      - net1
+      - net_default
   
   promtail:
     image: grafana/promtail:latest
@@ -119,7 +114,7 @@ services:
     depends_on:
       - loki
     networks:
-      - net1
+      - net_default
 
   netdata:
     image: netdata/netdata
@@ -147,22 +142,27 @@ services:
 
   sonarqube:
     image: sonarqube:latest
+    container_name: sonarqube
     links:
-      - mariadb:db
-    ports:
-      - "9000:9000"
+      - azure-sql-edge:db
+    command: "-Dsonar.search.javaAdditionalOpts=-Dnode.store.allow_mmap=false"
     environment:
-      SONARQUBE_JDBC_USERNAME: ${MARIADB_SONAR_USERNAME}
-      SONARQUBE_JDBC_PASSWORD: ${MARIADB_SONAR_PASSWORD}
-      SONARQUBE_JDBC_URL: "jdbc:mysql://db:3306/sonar?useUnicode=true&amp;characterEncoding=utf8"
+      SONAR_JDBC_USERNAME: ${MARIADB_SONAR_USERNAME}
+      SONAR_JDBC_PASSWORD: ${MARIADB_SONAR_PASSWORD}
+      SONAR_JDBC_URL: "jdbc:sqlserver://db:1433;databaseName=sonar;encrypt=true;trustServerCertificate=true;"
+      SONAR_ES_BOOTSTRAP_CHECKS_DISABLE: true
     networks:
-      - net1
+      - net_default
     volumes:
-      - sonarqube:/opt/sonarqube
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_logs:/opt/sonarqube/logs
+      - sonarqube_extensions:/opt/sonarqube/extensions
+    depends_on:
+      - webserver
 
 networks:
-  net1:
-    name: net1
+  net_default:
+    name: net_default
 
 volumes:
   sqlserver:
@@ -176,5 +176,6 @@ volumes:
   netdatalib:
   netdatacache:
   netdataconfig:
-  sonarqube:
-   driver: local
+  sonarqube_data:
+  sonarqube_logs:
+  sonarqube_extensions:

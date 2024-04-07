@@ -1,4 +1,5 @@
 name: Update nginx config
+run-name: "Deploy nginx config to ${{ github.env }} by @${{ github.actor }}"
 
 on:
   workflow_dispatch:
