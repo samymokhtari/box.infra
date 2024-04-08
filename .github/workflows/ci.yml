@@ -1,4 +1,6 @@
-name: On-Premise CI
+name: Continous Integration
+run-name: "Continous Integration to new changes by @${{ github.actor }}"
+
 on:
   pull_request:
     types: [opened, reopened, synchronize]
@@ -10,7 +12,7 @@ env:
   env: "production"
 
 jobs:
-  checks:
+  checks_connectivity:
     environment: on-premise
     runs-on: ubuntu-latest
     steps:
