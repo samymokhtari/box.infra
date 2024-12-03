@@ -83,6 +83,7 @@ jobs:
             ${{ env.FULLPATH }}/${{ env.script_install }}
             echo Starting Docker Compose...
             cd ${{ env.FULLPATH }} 
-            sudo docker compose up -d --pull --upgrade --remove-orphans
-            sudo docker exec webserver nginx -s reload
+            docker compose pull
+            docker compose up --detach --remove-orphans
+            docker exec webserver nginx -s reload
       

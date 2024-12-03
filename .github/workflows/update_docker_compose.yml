@@ -37,4 +37,4 @@ jobs:
           script: |
             Refreshing docker-compose file...
             cd ${{ env.FULLPATH }} 
-            sudo docker compose up -d --pull --remove-orphans
+            docker compose up -d --pull --remove-orphans

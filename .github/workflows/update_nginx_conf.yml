@@ -43,4 +43,4 @@ jobs:
           script: |
             Restarting nginx server...
             cd ${{ env.FULLPATH }} 
-            sudo docker exec  webserver nginx -s reload
+            docker exec  webserver nginx -s reload
