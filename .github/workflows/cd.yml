@@ -1,10 +1,11 @@
 name: Continous Deployment
-run-name: "Deploy to ${{ github.env }} by @${{ github.actor }}"
+run-name: "Deploy to ${{ github.repo.name }} by @${{ github.actor }}"
 
 
 on:
+  workflow_dispatch:
   push:
-    branches: [on-premise, fix/cd]
+    branches: [on-premise]
 
 env:
   env: "production"
@@ -12,11 +13,12 @@ env:
   script_install: "script_install.sh"
   nginx_conf: "nginx/conf/default.conf"
   grafana_conf: "grafana/*.yml"
+  scheduled_jobs: "scheduled_jobs/*.sh"
   docker_usr: ${{ vars.DOCKER_USER }}
   docker_pwd: ${{ secrets.DOCKER_PASSWORD }}
 
 jobs:
-  deploy:
+  deploy-sources:
     env:
       FULLPATH: /home/${{ secrets.SSH_USERNAME }}/scripts
     environment: on-premise
@@ -25,18 +27,18 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Copy Script Install & Docker compose via ssh
-        uses: appleboy/scp-action@v0.1.4
+        uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
-          source: ${{ env.script_install }}, ${{ env.dockercompose }}, ${{ env.nginx_conf }}, ${{ env.grafana_conf }}
+          source: ${{ env.script_install }}, ${{ env.dockercompose }}, ${{ env.nginx_conf }}, ${{ env.grafana_conf }}, ${{ env.scheduled_jobs }}
           overwrite : true
           target: ${{ env.FULLPATH }}
 
       - name: Give permissions to execute scripts
-        uses: appleboy/ssh-action@v1.0.0
+        uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
@@ -46,9 +48,10 @@ jobs:
             chmod +x ${{ env.FULLPATH }}/${{ env.script_install }}
             chmod +x ${{ env.FULLPATH }}/${{ env.dockercompose }}
             chmod +rwx ${{ env.FULLPATH }}/nginx
+            chmod +rwx ${{ env.FULLPATH }}/scheduled_jobs
 
       - name: Set environments variable in a file .env
-        uses: appleboy/ssh-action@v1.0.0
+        uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
@@ -70,7 +73,7 @@ jobs:
           docker login --username ${{ env.docker_usr }} --password ${{ env.docker_pwd }}
 
       - name: Setup Machine and Deploy Docker
-        uses: appleboy/ssh-action@v1.0.0
+        uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
@@ -80,6 +83,6 @@ jobs:
             ${{ env.FULLPATH }}/${{ env.script_install }}
             echo Starting Docker Compose...
             cd ${{ env.FULLPATH }} 
-            sudo docker compose up -d --pull --remove-orphans
-            sudo docker exec  webserver nginx -s reload
+            sudo docker compose up -d --pull --upgrade --remove-orphans
+            sudo docker exec webserver nginx -s reload
       

@@ -1,5 +1,5 @@
 name: Update nginx config
-run-name: "Deploy nginx config to ${{ github.env }} by @${{ github.actor }}"
+run-name: "Deploy nginx config to ${{ github.repo.name }} by @${{ github.actor }}"
 
 on:
   workflow_dispatch:
@@ -22,7 +22,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Copy Script Install & Docker compose via ssh
-        uses: appleboy/scp-action@v0.1.4
+        uses: appleboy/scp-action@v0.1.7
         with:
            host: ${{ secrets.SSH_HOST }}
            username: ${{ secrets.SSH_USERNAME }}
@@ -33,7 +33,7 @@ jobs:
            target: ${{ env.FULLPATH }}
 
       - name: Update nginx config
-        uses: appleboy/ssh-action@v1.0.0
+        uses: appleboy/ssh-action@v1.2.0
         if: ${{ github.event.inputs.reload_nginx }} == 'true'
         with:
           host: ${{ secrets.SSH_HOST }}
