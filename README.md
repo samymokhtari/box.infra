@@ -18,7 +18,7 @@ docker compose up -d -e MSSQL_SA_PASSWORD=pwd -e MARIADB_ROOT_USERNAME=username 
 
 https://mariadb.com/kb/en/container-backup-and-restoration/
 
-## Setting up SSL certificate for nginx webserver
+## Setting up SSL certificate for nginx web server
 
 https://mindsers.blog/en/post/https-using-nginx-certbot-docker/
 

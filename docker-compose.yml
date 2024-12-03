@@ -4,6 +4,7 @@ version: "3.8"
 name: box
 
 services:
+  # WEB SERVER & APIs
   webserver:
     container_name: webserver
     user: root
@@ -34,8 +35,8 @@ services:
     networks:
       - net_default
 
-  api:
-    container_name: api
+  box_api:
+    container_name: box_api
     image: samy266/box:latest
     depends_on:
       - azure-sql-edge
@@ -53,6 +54,7 @@ services:
     networks:
       - net_default
 
+  # DATABASES
   azure-sql-edge:
     container_name: azure-sql-edge
     user: root
@@ -79,11 +81,15 @@ services:
       MARIADB_USER: ${MARIADB_ROOT_USERNAME}
       MARIADB_PASSWORD: ${MARIADB_ROOT_PASSWORD}
       MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD}
+    labels:
+      mariadb-backup: "true"
     ports:
       - '3306:3306'
     networks:
       - net_default
 
+
+  # MONITORING
   grafana:
     container_name: grafana
     image: grafana/grafana
@@ -140,6 +146,7 @@ services:
       - /var/log:/host/var/log:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
 
+  # DEVELOPMENT TOOLS
   sonarqube:
     image: sonarqube:latest
     container_name: sonarqube

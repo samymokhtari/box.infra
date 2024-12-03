@@ -1,0 +1,41 @@
+name: Daily Backup
+run-name: "Daily backup jobs by @${{ github.actor }} at ${{ github.event.created_at }}"
+
+on:
+   schedule:
+      - cron: '0 1 * * *' # Every day at 1 AM
+jobs:
+   backup-databases:
+      env:
+         FULLPATH: /home/${{ secrets.SSH_USERNAME }}/scripts
+         SCHEDULED_JOBS_PATH: scheduled_jobs
+      environment: on-premise
+      runs-on: ubuntu-latest
+      steps:
+      - uses: actions/checkout@v4
+
+      - name: Execute database backups via ssh
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+           host: ${{ secrets.SSH_HOST }}
+           username: ${{ secrets.SSH_USERNAME }}
+           key: ${{ secrets.SSH_PRIVATE_KEY }}
+           port: ${{ secrets.SSH_PORT }}
+           script: |
+            # Navigate to the folder containing scripts
+            cd ${{ env.FULLPATH }}/${{ env.SCHEDULED_JOBS_PATH }} || exit 1
+
+            # List all `.sh` files and loop through each
+            errors=0
+            for script in backup_*.sh; do
+              echo "Executing $script..."
+              bash "$script" || echo "Error executing $script with exit code $?" && errors=$((errors + 1))
+            done
+
+            if [ $errors -gt 0 ]; then
+              echo "Encountered $errors errors during execution."
+              exit 1
+            else
+              echo "All scripts executed successfully."
+              exit 0
+            fi
