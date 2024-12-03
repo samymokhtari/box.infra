@@ -23,4 +23,4 @@ jobs:
           script: |
             Renewing certificates...
             cd ${{ env.FULLPATH }} 
-            sudo docker compose run --rm certbot renew
+            docker compose run --rm certbot renew
