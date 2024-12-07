@@ -65,6 +65,7 @@ services:
       MSSQL_PID: "Developer"
     volumes:
       - sqlserver:/var/opt/mssql/
+      - /backups/mssql:/var/opt/mssql/backups
     networks:
       - net_default
 
@@ -158,9 +159,7 @@ services:
     networks:
       - net_default
     volumes:
-      - sonarqube_data:/opt/sonarqube/data
-      - sonarqube_logs:/opt/sonarqube/logs
-      - sonarqube_extensions:/opt/sonarqube/extensions
+      - sonarqube:/opt/sonarqube/
     depends_on:
       - webserver
 
@@ -180,6 +179,4 @@ volumes:
   netdatalib:
   netdatacache:
   netdataconfig:
-  sonarqube_data:
-  sonarqube_logs:
-  sonarqube_extensions:
+  sonarqube:

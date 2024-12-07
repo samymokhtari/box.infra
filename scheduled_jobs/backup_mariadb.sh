@@ -59,8 +59,12 @@ for CONTAINER in $(docker ps -f label=mariadb-backup --format='{{.Names}}'); do
   # Check the result of the backup command
   if [[ $? -eq 0 ]]; then
     echo "Backup completed successfully for container: $CONTAINER"
+    # Return success code
+    exit 0
   else
     echo "Error: Backup failed for container: $CONTAINER"
+    # Return failure code
+    exit $?
   fi
 
 done
