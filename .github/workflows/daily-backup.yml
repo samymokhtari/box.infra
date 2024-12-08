@@ -1,5 +1,5 @@
-name: Daily Backup
-run-name: "Daily backup jobs by @${{ github.actor }} at ${{ github.event.created_at }}"
+name: Daily Backups
+run-name: "Daily backup jobs by @${{ github.actor }} - RUN #${{ github.run_id }} at "
 
 on:
    schedule:
@@ -14,6 +14,21 @@ jobs:
       steps:
       - uses: actions/checkout@v4
 
+      - name: Set environments variable in a file .env
+        uses: appleboy/ssh-action@v1.2.0
+        env:
+          env: "production"
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            cd ${{ env.FULLPATH }}/${{ env.SCHEDULED_JOBS_PATH }}
+            [ -e .env ] && rm .env
+            echo "ENV=${{ env.env }}" >> .env
+            echo "MSSQL_SA_PASSWORD=${{ secrets.DB_PASS }}" >> .env
+
       - name: Execute database backups via ssh
         uses: appleboy/ssh-action@v1.2.0
         with:
@@ -23,19 +38,24 @@ jobs:
            port: ${{ secrets.SSH_PORT }}
            script: |
             # Navigate to the folder containing scripts
-            cd ${{ env.FULLPATH }}/${{ env.SCHEDULED_JOBS_PATH }} || exit 1
+            cd "${{ env.FULLPATH }}/${{ env.SCHEDULED_JOBS_PATH }}" || { echo "Error: Failed to navigate to ${{ env.FULLPATH }}/${{ env.SCHEDULED_JOBS_PATH }}." >&2; exit 1; }
 
             # List all `.sh` files and loop through each
             errors=0
             for script in backup_*.sh; do
               echo "Executing $script..."
-              bash "$script" || echo "Error executing $script with exit code $?" && errors=$((errors + 1))
+              if ! bash "$script"; then
+                echo "Error: Failed to execute $script with exit code $?" >&2
+                errors=$((errors + 1))
+              fi
             done
 
             if [ $errors -gt 0 ]; then
-              echo "Encountered $errors errors during execution."
-              exit 1
+              echo "Error: Encountered $errors error(s) during script execution." >&2
+              exit 1  # Exit with an error code for GitHub Actions
             else
-              echo "All scripts executed successfully."
-              exit 0
+              echo "Success: All scripts executed successfully."
+              exit 0  # Exit with a success code for GitHub Actions
             fi
+
+            

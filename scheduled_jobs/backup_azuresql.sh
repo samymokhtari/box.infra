@@ -17,6 +17,7 @@ SA_PASSWORD="${MSSQL_SA_PASSWORD}"  # Retrieve the SA password from the environm
 
 # Ensure the host backup directory exists
 sudo mkdir -p "$HOST_BACKUP_DIR"
+sudo chmod +rwx $HOST_BACKUP_DIR
 
 # Iterate over the databases array and back up each one
 for DB_NAME in "${DATABASES[@]}"; do

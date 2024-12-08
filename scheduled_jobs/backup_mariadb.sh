@@ -1,19 +1,19 @@
 #!/usr/bin/env bash
 
 # Create the backup directory if it doesn't already exist
-BACKUP_DIR="/backups/mariadb"
-sudo mkdir -p $BACKUP_DIR
-chmod +rwx $BACKUP_DIR
+HOST_BACKUP_DIR="/backups/mariadb"
+sudo mkdir -p $HOST_BACKUP_DIR
+sudo chmod +rwx $HOST_BACKUP_DIR
 
 ### Clean up old backups
 
 MAX_BACKUPS=7 # Number of backups to keep
 
 # Navigate to the backup directory
-cd "$BACKUP_DIR" || { echo "Backup directory not found: $BACKUP_DIR"; exit 1; }
+cd "$HOST_BACKUP_DIR" || { echo "Backup directory not found: $HOST_BACKUP_DIR"; exit 1; }
 
 # Ensure only readable files are processed
-find "$BACKUP_DIR" -maxdepth 1 -type f -name 'export-*.sql' -readable -print0 | \
+find "$HOST_BACKUP_DIR" -maxdepth 1 -type f -name 'export-*.sql' -readable -print0 | \
 sort -rz | \
 tail -zn +$((MAX_BACKUPS + 1)) | \
 while IFS= read -r -d '' OLD_BACKUP; do
@@ -53,7 +53,7 @@ for CONTAINER in $(docker ps -f label=mariadb-backup --format='{{.Names}}'); do
     -e DB_PASS=${DB_PASS} \
     -e DB_HOST=${CONTAINER} \
     --network ${DB_NET} \
-    -v $BACKUP_DIR:/backup \
+    -v $HOST_BACKUP_DIR:/backup \
     registry.gitlab.com/ix.ai/mariadb-backup:latest
 
   # Check the result of the backup command

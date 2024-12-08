@@ -146,7 +146,7 @@ services:
 
   # DEVELOPMENT TOOLS
   sonarqube:
-    image: sonarqube:latest
+    image: sonarqube:community
     container_name: sonarqube
     links:
       - azure-sql-edge:db
@@ -159,7 +159,9 @@ services:
     networks:
       - net_default
     volumes:
-      - sonarqube:/opt/sonarqube/
+      - ./sonarqube/data:/opt/sonarqube/data
+      - ./sonarqube/extensions:/opt/sonarqube/extensions
+      - ./sonarqube/logs:/opt/sonarqube/logs
     depends_on:
       - webserver
 
@@ -179,4 +181,3 @@ volumes:
   netdatalib:
   netdatacache:
   netdataconfig:
-  sonarqube:
