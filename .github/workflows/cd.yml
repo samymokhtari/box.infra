@@ -83,8 +83,10 @@ jobs:
             echo "ENV=${{ env.env }}" >> .env.backup2gdrive
             echo "GOOGLE_SERVICE_ACCOUNT_JSON_PATH=${{ vars.GOOGLE_SERVICE_ACCOUNT_JSON_PATH }}" >> .env.backup2gdrive
             
-            [ -e config/google-service-account.json ] && rm config/google-service-account.json
-            echo "${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}" > config/google-service-account.json
+            sudo mkdir -p config
+            cd config
+            [ -e google-service-account.json ] && rm google-service-account.json
+            echo "${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}" > google-service-account.json
           
       - name: Log to Docker Hub
         run: |
