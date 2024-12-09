@@ -87,9 +87,13 @@ jobs:
             sudo chmod +rwx config
             cd config
             echo "${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}" > google-service-account.json
+            echo "Login Github Container Registry..."
+            docker login ghcr.io -u samymokhtari -p ${{ secrets.READ_CR_PAT_BOX }}
+            
           
-      - name: Log to Docker Hub
+      - name: Log to Docker Hub && Github Container Registry
         run: |
+          echo "Login Docker Hub..."
           docker login --username ${{ env.docker_usr }} --password ${{ env.docker_pwd }}
 
       - name: Setup Machine and Deploy Docker
