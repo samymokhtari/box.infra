@@ -84,6 +84,7 @@ jobs:
             echo "GOOGLE_SERVICE_ACCOUNT_JSON_PATH=${{ vars.GOOGLE_SERVICE_ACCOUNT_JSON_PATH }}" >> .env.backup2gdrive
             
             sudo mkdir -p config
+            sudo chmod +rwx config
             cd config
             [ -e google-service-account.json ] && rm google-service-account.json
             echo "${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}" > google-service-account.json
