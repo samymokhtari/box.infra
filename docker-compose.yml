@@ -86,6 +86,15 @@ services:
     networks:
       - net_default
 
+  ### DATABASES BACKUPS
+  backup2gdrive:
+    container_name: backup2gdrive
+    image: ghcr.io/fivekage/backup2gdrive
+    restart: never
+    volumes:
+      - ./backup2gdrive:/app/config
+    env_file:
+      - .env.backup2gdrive
 
   # MONITORING
   grafana:
@@ -158,10 +167,10 @@ services:
       SONAR_ES_BOOTSTRAP_CHECKS_DISABLE: true
     networks:
       - net_default
-    volumes:
-      - ./sonarqube/data:/opt/sonarqube/data
-      - ./sonarqube/extensions:/opt/sonarqube/extensions
-      - ./sonarqube/logs:/opt/sonarqube/logs
+    # volumes: # Doesn't work idk why
+      # - ./sonarqube/data:/opt/sonarqube/data
+      # - ./sonarqube/extensions:/opt/sonarqube/extensions
+      # - ./sonarqube/logs:/opt/sonarqube/logs
     depends_on:
       - webserver
 

@@ -14,6 +14,7 @@ env:
   nginx_conf: "nginx/conf/default.conf"
   grafana_conf: "grafana/*.yml"
   scheduled_jobs: "scheduled_jobs/*.sh"
+  backup2gdrive: "backup2gdrive/config.json"
   docker_usr: ${{ vars.DOCKER_USER }}
   docker_pwd: ${{ secrets.DOCKER_PASSWORD }}
 
@@ -33,7 +34,7 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
-          source: ${{ env.script_install }}, ${{ env.dockercompose }}, ${{ env.nginx_conf }}, ${{ env.grafana_conf }}, ${{ env.scheduled_jobs }}
+          source: ${{ env.script_install }}, ${{ env.dockercompose }}, ${{ env.nginx_conf }}, ${{ env.grafana_conf }}, ${{ env.scheduled_jobs }}, ${{ env.backup2gdrive }}
           overwrite : true
           target: ${{ env.FULLPATH }}
 
@@ -47,6 +48,7 @@ jobs:
           script: |
             chmod +x ${{ env.FULLPATH }}/${{ env.script_install }}
             chmod +x ${{ env.FULLPATH }}/${{ env.dockercompose }}
+            chmod +rwx ${{ env.FULLPATH }}/backup2gdrive
             chmod +rwx ${{ env.FULLPATH }}/nginx
             chmod +rwx ${{ env.FULLPATH }}/scheduled_jobs
 
@@ -67,6 +69,22 @@ jobs:
             echo "MARIADB_SONAR_USERNAME=${{ secrets.SONAR_DB_USER }}" >> .env
             echo "MARIADB_SONAR_PASSWORD=${{ secrets.SONAR_DB_PASS }}" >> .env
             echo "BOX_API_KEY=${{ secrets.BOX_API_KEY }}" >> .env
+
+      - name: Set credentials gcp for backup2gdrive
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            cd ${{ env.FULLPATH }}/backup2gdrive
+            [ -e .env.backup2gdrive ] && rm .env.backup2gdrive
+            echo "ENV=${{ env.env }}" >> .env.backup2gdrive
+            echo "GOOGLE_SERVICE_ACCOUNT_JSON_PATH=${{ vars.GOOGLE_SERVICE_ACCOUNT_JSON_PATH }}" >> .env.backup2gdrive
+            
+            [ -e config/google-service-account.json ] && rm config/google-service-account.json
+            echo ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }} > config/google-service-account.json
           
       - name: Log to Docker Hub
         run: |

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Source the .env file to load environment variables
+# Load environment variables from the .env file
 if [ -f .env ]; then
   source .env
 else
@@ -8,18 +8,34 @@ else
   exit 1
 fi
 
-# Variables
-CONTAINER_NAME="azure-sql-edge"      # Container name from your configuration
-DATABASES=("box" "sonar")        # Array of database names to back up
-BACKUP_DIR="/var/opt/mssql/backups" # Directory inside the container for backups
-HOST_BACKUP_DIR="/backups/mssql"    # Directory on the host mapped to container backup dir
-SA_PASSWORD="${MSSQL_SA_PASSWORD}"  # Retrieve the SA password from the environment
+# Configuration Variables
+CONTAINER_NAME="azure-sql-edge"      # Name of the Azure SQL Edge container
+DATABASES=("box" "sonar")            # List of databases to back up
+BACKUP_DIR="/var/opt/mssql/backups"  # Backup directory inside the container
+HOST_BACKUP_DIR="/backups/mssql"     # Backup directory on the host system
+MAX_BACKUPS=7                        # Number of backups to retain
+SA_PASSWORD="${MSSQL_SA_PASSWORD}"   # Retrieve SA password from the environment
 
 # Ensure the host backup directory exists
 sudo mkdir -p "$HOST_BACKUP_DIR"
-sudo chmod +rwx $HOST_BACKUP_DIR
+sudo chmod +rwx "$HOST_BACKUP_DIR"
 
-# Iterate over the databases array and back up each one
+# Cleanup old backups
+echo "Cleaning up old backups..."
+cd "$HOST_BACKUP_DIR" || { echo "Error: Backup directory not found: $HOST_BACKUP_DIR"; exit 1; }
+
+# Find and remove older backups beyond the MAX_BACKUPS limit
+find "$HOST_BACKUP_DIR" -maxdepth 1 -type f -name '*.bak' -readable -print0 | \
+sort -rz | \
+tail -zn +$((MAX_BACKUPS + 1)) | \
+while IFS= read -r -d '' OLD_BACKUP; do
+  echo "Deleting old backup: $OLD_BACKUP"
+  rm -f "$OLD_BACKUP" || echo "Failed to delete $OLD_BACKUP"
+done
+
+echo "Old backup cleanup complete. Retained the latest $MAX_BACKUPS backups."
+
+# Backup each database
 for DB_NAME in "${DATABASES[@]}"; do
   BACKUP_FILE="${DB_NAME}_$(date +%Y%m%d%H%M%S).bak" # Backup file with timestamp
 
@@ -30,7 +46,9 @@ for DB_NAME in "${DATABASES[@]}"; do
   # Check if the backup was successful
   if [ $? -eq 0 ]; then
     echo "Backup of database $DB_NAME completed successfully."
-    echo "Backup file: $HOST_BACKUP_DIR/$BACKUP_FILE"
+    # Move the backup file to the host directory
+    docker cp "$CONTAINER_NAME:$BACKUP_DIR/$BACKUP_FILE" "$HOST_BACKUP_DIR/" && \
+    echo "Backup file moved to: $HOST_BACKUP_DIR/$BACKUP_FILE"
   else
     echo "Error: Backup of database $DB_NAME failed."
     exit 1

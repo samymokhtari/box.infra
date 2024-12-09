@@ -1,5 +1,5 @@
 name: Daily Backups
-run-name: "Daily backup jobs by @${{ github.actor }} - RUN #${{ github.run_id }} at "
+run-name: "Daily backup jobs by @${{ github.actor }} - RUN #${{ github.run_id }}"
 
 on:
    schedule:
@@ -58,4 +58,13 @@ jobs:
               exit 0  # Exit with a success code for GitHub Actions
             fi
 
-            
+      - name: Send Backups to Google Drive
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+           host: ${{ secrets.SSH_HOST }}
+           username: ${{ secrets.SSH_USERNAME }}
+           key: ${{ secrets.SSH_PRIVATE_KEY }}
+           port: ${{ secrets.SSH_PORT }}
+           script: |
+            cd ${{ env.FULLPATH }}
+            docker compose run --rm backup2gdrive
