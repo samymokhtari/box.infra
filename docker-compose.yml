@@ -90,11 +90,11 @@ services:
   backup2gdrive:
     container_name: backup2gdrive
     image: ghcr.io/fivekage/backup2gdrive
-    restart: never
+    restart: no
     volumes:
       - ./backup2gdrive:/app/config
     env_file:
-      - .env.backup2gdrive
+      - ./backup2gdrive/.env.backup2gdrive
 
   # MONITORING
   grafana:
@@ -155,7 +155,7 @@ services:
 
   # DEVELOPMENT TOOLS
   sonarqube:
-    image: sonarqube:community
+    image: sonarqube:latest
     container_name: sonarqube
     links:
       - azure-sql-edge:db
