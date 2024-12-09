@@ -14,7 +14,7 @@ env:
   nginx_conf: "nginx/conf/default.conf"
   grafana_conf: "grafana/*.yml"
   scheduled_jobs: "scheduled_jobs/*.sh"
-  backup2gdrive: "backup2gdrive/config.json"
+  backup2gdrive: "backup2gdrive/config/config.json"
   docker_usr: ${{ vars.DOCKER_USER }}
   docker_pwd: ${{ secrets.DOCKER_PASSWORD }}
 
@@ -86,7 +86,6 @@ jobs:
             sudo mkdir -p config
             sudo chmod +rwx config
             cd config
-            [ -e google-service-account.json ] && rm google-service-account.json
             echo "${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}" > google-service-account.json
           
       - name: Log to Docker Hub
