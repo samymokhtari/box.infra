@@ -14,7 +14,7 @@ env:
   nginx_conf: "nginx/conf/default.conf"
   grafana_conf: "grafana/*.yml"
   scheduled_jobs: "scheduled_jobs/*.sh"
-  backup2gdrive: "backup2gdrive/config/config.json"
+  backup2gdrive: "backup2gdrive/config.json"
   docker_usr: ${{ vars.DOCKER_USER }}
   docker_pwd: ${{ secrets.DOCKER_PASSWORD }}
 
@@ -83,9 +83,6 @@ jobs:
             echo "ENV=${{ env.env }}" >> .env.backup2gdrive
             echo "GOOGLE_SERVICE_ACCOUNT_JSON_PATH=${{ vars.GOOGLE_SERVICE_ACCOUNT_JSON_PATH }}" >> .env.backup2gdrive
             
-            sudo mkdir -p config
-            sudo chmod +rwx config
-            cd config
             echo "${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}" > google-service-account.json
             echo "Login Github Container Registry..."
             docker login ghcr.io -u samymokhtari -p ${{ secrets.READ_CR_PAT_BOX }}

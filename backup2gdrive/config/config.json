@@ -5,7 +5,7 @@
    "pathsToBackup": [
       {
          "folderPath": "/backups/mariadb",
-         "filterFile": "^[^\/]+$",
+         "filterFile": ".*\\.tar.gz$",
          "zipName": "mariadb"
       },
       {

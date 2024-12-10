@@ -92,6 +92,7 @@ services:
     image: ghcr.io/fivekage/backup2gdrive
     restart: no
     volumes:
+      - /backups:/backups
       - ./backup2gdrive:/app/config
     env_file:
       - ./backup2gdrive/.env.backup2gdrive
