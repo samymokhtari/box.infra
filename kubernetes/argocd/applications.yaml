@@ -7,7 +7,7 @@ spec:
   project: databases
   destination:
     server: https://kubernetes.default.svc
-    namespace: default
+    namespace: argocd
   sources:
     - repoURL: https://github.com/samymokhtari/box.infra.git
       path: kubernetes/mariadb
@@ -31,13 +31,16 @@ spec:
   project: monitoring
   destination:
     server: https://kubernetes.default.svc
-    namespace: monitoring
+    namespace: argocd
   sources:
     - repoURL: https://github.com/samymokhtari/box.infra.git
       path: kubernetes/grafana
       targetRevision: dev
     - repoURL: https://github.com/samymokhtari/box.infra.git
       path: kubernetes/sonar
+      targetRevision: dev
+    - repoURL: https://github.com/samymokhtari/box.infra.git
+      path: kubernetes/argocd
       targetRevision: dev
   syncPolicy:
     syncOptions:
@@ -53,6 +56,9 @@ metadata:
   namespace: argocd
 spec:
   project: monitoring
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: argocd
   source:
     chart: sonarqube
     repoURL: https://sonarsource.github.io/helm-chart-sonarqube
@@ -110,9 +116,7 @@ spec:
             periodSeconds: 10
             successThreshold: 1
             failureThreshold: 3
-  destination:
-    server: "https://kubernetes.default.svc"
-    namespace: sonarqube
+
   syncPolicy:
     syncOptions:
       - CreateNamespace=true
@@ -129,13 +133,12 @@ spec:
   project: default
   destination:
     server: https://kubernetes.default.svc
-    namespace: default
+    namespace: argocd
   sources:
     - repoURL: https://github.com/samymokhtari/box.infra.git
-      path: kubernetes/letsencrypt
-      targetRevision: dev
-    - repoURL: https://github.com/samymokhtari/box.infra.git
-      path: kubernetes/github
+      path: kubernetes/shared
+      directory:
+        recurse: true
       targetRevision: dev
   syncPolicy:
     syncOptions:
@@ -148,12 +151,12 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: muslimbot
-  namespace: muslimbot
+  namespace: argocd
 spec:
   project: apps
   destination:
     server: https://kubernetes.default.svc
-    namespace: muslimbot
+    namespace: argocd
   sources:
     - repoURL: https://github.com/samymokhtari/box.infra.git
       path: kubernetes/muslimbot
