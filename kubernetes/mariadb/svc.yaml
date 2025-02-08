@@ -2,6 +2,9 @@ apiVersion: v1
 kind: Service
 metadata:
   name: mariadb
+  namespace: mariadb
+  labels:
+    type: db
 spec:
   type: NodePort # Exposes the service externally
   selector:

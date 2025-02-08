@@ -2,8 +2,10 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: muslimbot
+  namespace: muslimbot
   labels:
     app: muslimbot
+    type: app
 spec:
   replicas: 1 # Initial replica count (HPA will scale this)
   selector:
