@@ -8,7 +8,7 @@ spec:
   sourceRepos:
     - https://github.com/samymokhtari/box.infra.git
   destinations:
-    - namespace: default
+    - namespace: argocd
       server: https://kubernetes.default.svc
   clusterResourceWhitelist:
     - group: "*"
@@ -28,9 +28,9 @@ spec:
     - https://github.com/samymokhtari/box.infra.git
     - https://sonarsource.github.io/helm-chart-sonarqube
   destinations:
-    - namespace: monitoring
+    - namespace: argocd
       server: https://kubernetes.default.svc
-    - namespace: sonarqube
+    - namespace: argocd
       server: https://kubernetes.default.svc
   clusterResourceWhitelist:
     - group: "*"
@@ -49,7 +49,7 @@ spec:
   sourceRepos:
     - https://github.com/samymokhtari/box.infra.git
   destinations:
-    - namespace: muslimbot
+    - namespace: argocd
       server: https://kubernetes.default.svc
   clusterResourceWhitelist:
     - group: "*"
