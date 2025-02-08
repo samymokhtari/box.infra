@@ -4,7 +4,7 @@ metadata:
   name: databases
   namespace: argocd
 spec:
-  project: default
+  project: databases
   destination:
     server: https://kubernetes.default.svc
     namespace: default
@@ -28,7 +28,7 @@ metadata:
   name: monitoring
   namespace: argocd
 spec:
-  project: default
+  project: monitoring
   destination:
     server: https://kubernetes.default.svc
     namespace: monitoring
@@ -38,40 +38,6 @@ spec:
       targetRevision: dev
     - repoURL: https://github.com/samymokhtari/box.infra.git
       path: kubernetes/sonar
-      targetRevision: dev
-    - repoURL: https://github.com/samymokhtari/box.infra.git
-      path: kubernetes/k3s-dashboard
-      targetRevision: dev
-  syncPolicy:
-    syncOptions:
-      - CreateNamespace=true
-    automated:
-      prune: true
-      selfHeal: true
-
----
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: apps
-  namespace: argocd
-spec:
-  project: default
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: default
-  sources:
-    - repoURL: https://github.com/samymokhtari/box.infra.git
-      path: kubernetes/box
-      targetRevision: dev
-    - repoURL: https://github.com/samymokhtari/box.infra.git
-      path: kubernetes/muslimbot
-      targetRevision: dev
-    - repoURL: https://github.com/samymokhtari/box.infra.git
-      path: kubernetes/letsencrypt
-      targetRevision: dev
-    - repoURL: https://github.com/samymokhtari/box.infra.git
-      path: kubernetes/github
       targetRevision: dev
   syncPolicy:
     syncOptions:
@@ -86,7 +52,7 @@ metadata:
   name: sonarqube
   namespace: argocd
 spec:
-  project: default
+  project: monitoring
   source:
     chart: sonarqube
     repoURL: https://sonarsource.github.io/helm-chart-sonarqube
@@ -147,6 +113,51 @@ spec:
   destination:
     server: "https://kubernetes.default.svc"
     namespace: sonarqube
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+    automated:
+      prune: true
+      selfHeal: true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: access
+  namespace: argocd
+spec:
+  project: default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+  sources:
+    - repoURL: https://github.com/samymokhtari/box.infra.git
+      path: kubernetes/letsencrypt
+      targetRevision: dev
+    - repoURL: https://github.com/samymokhtari/box.infra.git
+      path: kubernetes/github
+      targetRevision: dev
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+    automated:
+      prune: true
+      selfHeal: true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: muslimbot
+  namespace: muslimbot
+spec:
+  project: apps
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: muslimbot
+  sources:
+    - repoURL: https://github.com/samymokhtari/box.infra.git
+      path: kubernetes/muslimbot
+      targetRevision: dev
   syncPolicy:
     syncOptions:
       - CreateNamespace=true

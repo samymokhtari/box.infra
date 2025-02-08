@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: azuresql
-          image: mcr.microsoft.com/azure-sql-edge:latest
+          image: mcr.microsoft.com/azure-sql-edge:latest # TODO : Migrate all db to mariadb or postgres
           ports:
             - containerPort: 1433
           env:
