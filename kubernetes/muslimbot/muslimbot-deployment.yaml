@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: muslimbot
+  labels:
+    app: muslimbot
+spec:
+  replicas: 1 # Initial replica count (HPA will scale this)
+  selector:
+    matchLabels:
+      app: muslimbot
+  template:
+    metadata:
+      labels:
+        app: muslimbot
+    spec:
+      imagePullSecrets:
+        - name: ghcr-secret
+      containers:
+        - name: muslimbot
+          image: ghcr.io/fivekage/muslimbot:latest
+          resources:
+            requests:
+              cpu: "100m"
+            limits:
+              cpu: "500m"
+          env:
+            - name: NODE_ENV
+              value: development
+            - name: DISCORD_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: muslimbot-secrets
+                  key: DISCORD_TOKEN
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: muslimbot-secrets
+                  key: DB_PASSWORD
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: muslimbot-secrets
+                  key: DB_USERNAME
+            - name: CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: muslimbot-secrets
+                  key: CLIENT_ID
+            - name: DB_HOST
+              value: mariadb.default.svc.cluster.local
+            - name: DB_DATABASE
+              value: muslimbot_dev
+            - name: HADITH_API_URL
+              value: https://random-hadith-generator.vercel.app/
+            - name: HADITH_SCHEDULE_HOUR
+              value: "10"
+            - name: HADITH_SCHEDULE_MINUTE
+              value: "0"
+            - name: PRAYER_SCHEDULE_RULE
+              value: "0 */2 * * *"
+          volumeMounts:
+            - name: quran-volume
+              mountPath: /usr/src/bot/quran
+
+      volumes:
+        - name: quran-volume
+          hostPath:
+            path: /home/sm/quran # NFS path
+            type: Directory

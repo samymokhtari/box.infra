@@ -1,0 +1,155 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: databases
+  namespace: argocd
+spec:
+  project: default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+  sources:
+    - repoURL: https://github.com/samymokhtari/box.infra.git
+      path: kubernetes/mariadb
+      targetRevision: dev
+    - repoURL: https://github.com/samymokhtari/box.infra.git
+      path: kubernetes/azuresql
+      targetRevision: dev
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+    automated:
+      prune: true
+      selfHeal: true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: monitoring
+  namespace: argocd
+spec:
+  project: default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+  sources:
+    - repoURL: https://github.com/samymokhtari/box.infra.git
+      path: kubernetes/grafana
+      targetRevision: dev
+    - repoURL: https://github.com/samymokhtari/box.infra.git
+      path: kubernetes/sonar
+      targetRevision: dev
+    - repoURL: https://github.com/samymokhtari/box.infra.git
+      path: kubernetes/k3s-dashboard
+      targetRevision: dev
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+    automated:
+      prune: true
+      selfHeal: true
+
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: apps
+  namespace: argocd
+spec:
+  project: default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+  sources:
+    - repoURL: https://github.com/samymokhtari/box.infra.git
+      path: kubernetes/box
+      targetRevision: dev
+    - repoURL: https://github.com/samymokhtari/box.infra.git
+      path: kubernetes/muslimbot
+      targetRevision: dev
+    - repoURL: https://github.com/samymokhtari/box.infra.git
+      path: kubernetes/letsencrypt
+      targetRevision: dev
+    - repoURL: https://github.com/samymokhtari/box.infra.git
+      path: kubernetes/github
+      targetRevision: dev
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+    automated:
+      prune: true
+      selfHeal: true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: sonarqube
+  namespace: argocd
+spec:
+  project: default
+  source:
+    chart: sonarqube
+    repoURL: https://sonarsource.github.io/helm-chart-sonarqube
+    targetRevision: 2025.1.0
+    helm:
+      releaseName: sonarqube
+      values: |
+        edition: "developer"
+
+        monitoringPasscode: "oZgKrCkpTUe2z2NLx2JQKIw213!"
+
+        extraEnv:
+          - name: SONAR_ES_BOOTSTRAP_CHECKS_DISABLE
+            value: "true"
+          - name: SONAR_SEARCH_JAVAADDITIONALOPTS
+            value: "-Dnode.store.allow_mmap=false"
+          - name: SONAR_JDBC_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: sonarqube-secrets
+                key: SONAR_JDBC_PASSWORD
+
+        persistence:
+          enabled: true
+          storageClass: ""
+          size: 5Gi
+
+        postgresql:
+          enabled: false # Disable embedded PostgreSQL
+
+        jdbcOverwrite:
+          enabled: true
+          jdbcUrl: "jdbc:sqlserver://azuresql.default.svc.cluster.local:1433;databaseName=sonar;encrypt=false;trustServerCertificate=true"
+          jdbcUsername: "sa"
+          jdbcSecretName: "sonarqube-secrets"
+          jdbcSecretPasswordKey: "SONAR_JDBC_PASSWORD"
+
+        sonarQube:
+          initialDelaySeconds: 300 # Increase initial delay to accommodate the database start time
+          timeoutSeconds: 60
+          periodSeconds: 10
+          successThreshold: 1
+          failureThreshold: 3
+
+          livenessProbe:
+            initialDelaySeconds: 360 # Ensure the application has enough time to start
+            timeoutSeconds: 60
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+
+          startupProbe:
+            initialDelaySeconds: 300 # Allow for sufficient startup time
+            timeoutSeconds: 60
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: sonarqube
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+    automated:
+      prune: true
+      selfHeal: true
