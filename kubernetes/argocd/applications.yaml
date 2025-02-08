@@ -127,7 +127,7 @@ metadata:
   name: access
   namespace: argocd
 spec:
-  project: default
+  project: shared
   destination:
     server: https://kubernetes.default.svc
   sources:

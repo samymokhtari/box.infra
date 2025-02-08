@@ -2,6 +2,9 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: grafana
+  namespace: monitoring
+  labels:
+    app: grafana
 spec:
   replicas: 1
   selector:

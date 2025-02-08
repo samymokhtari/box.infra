@@ -2,6 +2,9 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: azuresql
+  namespace: azuresql
+  labels:
+    type: db
 spec:
   serviceName: "azuresql"
   replicas: 1
