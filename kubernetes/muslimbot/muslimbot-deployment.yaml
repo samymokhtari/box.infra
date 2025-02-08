@@ -18,7 +18,7 @@ spec:
         - name: ghcr-secret
       containers:
         - name: muslimbot
-          image: ghcr.io/fivekage/muslimbot:latest
+          image: ghcr.io/fivekage/muslimbot:1.2.11
           resources:
             requests:
               cpu: "100m"
