@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: box-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: box-api
+  template:
+    metadata:
+      labels:
+        app: box-api
+    spec:
+      containers:
+        - name: box-api
+          image: samy266/box:latest
+          ports:
+            - containerPort: 80
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: "Production"
+            - name: API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: box-secrets
+                  key: BOX_API_KEY
+            - name: ConnStr
+              valueFrom:
+                secretKeyRef:
+                  name: db-secrets
+                  key: ConnStr
