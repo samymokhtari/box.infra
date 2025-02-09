@@ -15,12 +15,6 @@ spec:
   namespaceResourceWhitelist:
     - group: "*"
       kind: "*"
-  syncWindows:
-    - kind: deny
-      schedule: "Mon-Fri 09:00-18:00"
-      duration: "9h"
-      applications:
-        - "databases/*"
 ---
 apiVersion: argoproj.io/v1alpha1
 kind: AppProject
