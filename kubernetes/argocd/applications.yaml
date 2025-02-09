@@ -9,10 +9,7 @@ spec:
     server: https://kubernetes.default.svc
   sources:
     - repoURL: https://github.com/samymokhtari/box.infra.git
-      path: kubernetes/mariadb
-      targetRevision: dev
-    - repoURL: https://github.com/samymokhtari/box.infra.git
-      path: kubernetes/azuresql
+      path: kubernetes/databases
       targetRevision: dev
   syncPolicy:
     syncOptions:
@@ -32,14 +29,10 @@ spec:
     server: https://kubernetes.default.svc
   sources:
     - repoURL: https://github.com/samymokhtari/box.infra.git
-      path: kubernetes/grafana
+      path: kubernetes/monitoring
       targetRevision: dev
-    - repoURL: https://github.com/samymokhtari/box.infra.git
-      path: kubernetes/sonar
-      targetRevision: dev
-    - repoURL: https://github.com/samymokhtari/box.infra.git
-      path: kubernetes/argocd
-      targetRevision: dev
+      directory:
+        recurse: true
   syncPolicy:
     syncOptions:
       - CreateNamespace=true
@@ -65,13 +58,16 @@ spec:
       values: |
         edition: "developer"
 
-        monitoringPasscode: "oZgKrCkpTUe2z2NLx2JQKIw213!"
-
         extraEnv:
           - name: SONAR_ES_BOOTSTRAP_CHECKS_DISABLE
             value: "true"
           - name: SONAR_SEARCH_JAVAADDITIONALOPTS
             value: "-Dnode.store.allow_mmap=false"
+          - name: MONITORING_PASSCODE
+            valueFrom:
+              secretKeyRef:
+                name: sonarqube-secrets
+                key: monitoringPasscode
           - name: SONAR_JDBC_PASSWORD
             valueFrom:
               secretKeyRef:
@@ -133,9 +129,9 @@ spec:
   sources:
     - repoURL: https://github.com/samymokhtari/box.infra.git
       path: kubernetes/shared
+      targetRevision: dev
       directory:
         recurse: true
-      targetRevision: dev
   syncPolicy:
     syncOptions:
       - CreateNamespace=true
@@ -153,8 +149,10 @@ spec:
     server: https://kubernetes.default.svc
   sources:
     - repoURL: https://github.com/samymokhtari/box.infra.git
-      path: kubernetes/muslimbot
+      path: kubernetes/apps
       targetRevision: dev
+      directory:
+        recurse: true
   syncPolicy:
     syncOptions:
       - CreateNamespace=true
