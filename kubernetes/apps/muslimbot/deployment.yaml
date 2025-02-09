@@ -2,7 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: muslimbot
-  namespace: muslimbot
   labels:
     app: muslimbot
     type: app
@@ -17,7 +16,7 @@ spec:
         app: muslimbot
     spec:
       imagePullSecrets:
-        - name: ghcr-secret
+        - name: muslimbot-secrets
       containers:
         - name: muslimbot
           image: ghcr.io/fivekage/muslimbot:1.2.11

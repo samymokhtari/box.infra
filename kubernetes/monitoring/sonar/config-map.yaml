@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sonarqube-config
+  namespace: monitoring
+data:
+  SONAR_ES_BOOTSTRAP_CHECKS_DISABLE: "true"
+  SONAR_SEARCH_JAVAADDITIONALOPTS: "-Dnode.store.allow_mmap=false"
+  EDITION: "developer"

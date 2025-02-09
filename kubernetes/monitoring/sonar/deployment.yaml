@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sonarqube
+  namespace: monitoring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sonarqube
+  template:
+    metadata:
+      labels:
+        app: sonarqube
+    spec:
+      containers:
+        - name: sonarqube
+          image: sonarqube:9.9.8-developer
+          ports:
+            - containerPort: 9000
+          env:
+            - name: SONAR_ES_BOOTSTRAP_CHECKS_DISABLE
+              valueFrom:
+                configMapKeyRef:
+                  name: sonarqube-config
+                  key: SONAR_ES_BOOTSTRAP_CHECKS_DISABLE
+            - name: SONAR_SEARCH_JAVAADDITIONALOPTS
+              valueFrom:
+                configMapKeyRef:
+                  name: sonarqube-config
+                  key: SONAR_SEARCH_JAVAADDITIONALOPTS
+            - name: MONITORING_PASSCODE
+              valueFrom:
+                secretKeyRef:
+                  name: sonarqube-secrets
+                  key: MONITORING_PASSCODE
+            - name: EDITION
+              valueFrom:
+                configMapKeyRef:
+                  name: sonarqube-config
+                  key: EDITION
+            - name: SONAR_JDBC_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: sonarqube-secrets
+                  key: SONAR_JDBC_USERNAME
+            - name: SONAR_JDBC_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: sonarqube-secrets
+                  key: SONAR_JDBC_PASSWORD
+            - name: SONAR_JDBC_URL
+              value: "jdbc:sqlserver://azuresql.default.svc.cluster.local:1433;databaseName=sonar;encrypt=false;trustServerCertificate=true"
+          volumeMounts:
+            - mountPath: "/opt/sonarqube/data"
+              name: sonarqube-data
+          livenessProbe:
+            httpGet:
+              path: "/"
+              port: 9000
+            initialDelaySeconds: 300
+            timeoutSeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: "/"
+              port: 9000
+            initialDelaySeconds: 60
+            timeoutSeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+      volumes:
+        - name: sonarqube-data
+          persistentVolumeClaim:
+            claimName: sonarqube-pvc
