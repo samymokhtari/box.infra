@@ -1,0 +1,77 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: netdata-config-pv
+  labels:
+    app: netdata
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /mnt/data/netdata/config
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: netdata-config-pvc
+  namespace: monitoring
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: netdata-cache-pv
+  labels:
+    app: netdata
+spec:
+  capacity:
+    storage: 2Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /mnt/data/netdata/cache
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: netdata-cache-pvc
+  namespace: monitoring
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: netdata-lib-pv
+  labels:
+    app: netdata
+spec:
+  capacity:
+    storage: 2Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /mnt/data/netdata/lib
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: netdata-lib-pvc
+  namespace: monitoring
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi

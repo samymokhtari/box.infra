@@ -1,56 +1,6 @@
-name: box
+name: private-cloud
 
 services:
-  # WEB SERVER & APIs
-  webserver:
-    container_name: webserver
-    user: root
-    image: nginx:latest
-    ports:
-      - 80:80
-      - 443:443
-    volumes:
-      - ./nginx/conf/:/etc/nginx/conf.d/:rw
-      - ./certbot/www:/var/www/certbot/:rw
-      - ./certbot/conf/:/etc/nginx/ssl/:rw
-      - ./nginx/logs:/var/log/nginx/
-    labels:
-      logging: "promtail"
-      logging_jobname: "containerlogs"
-    networks:
-      - net_default
-
-  certbot:
-    container_name: certbot
-    depends_on:
-      - webserver
-    image: certbot/certbot:latest
-    volumes:
-      - ./certbot/var/www/letsencrypt:/var/www/letsencrypt:rw
-      - ./certbot/www/:/var/www/certbot/:rw
-      - ./certbot/conf/:/etc/letsencrypt/:rw
-    networks:
-      - net_default
-
-  box_api:
-    container_name: box_api
-    image: samy266/box:latest
-    depends_on:
-      - azure-sql-edge
-      - webserver
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Production
-      - ASPNETCORE_URLS=http://+:80
-      - API_KEY=${BOX_API_KEY}
-      - ConnStr=Server=azure-sql-edge;Database=box;User=sa;Password=${MSSQL_SA_PASSWORD};TrustServerCertificate=True;Encrypt=True;
-    labels:
-      logging: "promtail"
-      logging_jobname: "containerlogs"
-    volumes:
-      - box-files:/box/
-    networks:
-      - net_default
-
   # DATABASES
   azure-sql-edge:
     container_name: azure-sql-edge
@@ -86,94 +36,6 @@ services:
     networks:
       - net_default
 
-  ### DATABASES BACKUPS
-  backup2gdrive:
-    container_name: backup2gdrive
-    image: ghcr.io/fivekage/backup2gdrive
-    restart: no
-    volumes:
-      - /backups:/backups
-      - ./backup2gdrive:/app/config
-    env_file:
-      - ./backup2gdrive/.env.backup2gdrive
-
-  # MONITORING
-  grafana:
-    container_name: grafana
-    image: grafana/grafana
-    volumes:
-      - ./grafana/grafana-datasources.yml:/etc/grafana/provisioning/datasources/datasources.yaml
-      - grafana:/var/lib/grafana
-    networks:
-      - net_default
-
-  loki:
-    image: grafana/loki:latest
-    container_name: loki
-    ports:
-      - 3100:3100
-    command: -config.file=/etc/loki/local-config.yaml
-    networks:
-      - net_default
-  
-  promtail:
-    image: grafana/promtail:latest
-    container_name: promtail
-    volumes:
-      - ./grafana/promtail-config.yml:/etc/promtail/promtail-config.yml
-      - /var/lib/docker/containers:/var/lib/docker/containers:ro
-      - /var/run/docker.sock:/var/run/docker.sock
-      - /var/log/muslimbot:/var/log/muslimbot
-    command: -config.file=/etc/promtail/promtail-config.yml
-    depends_on:
-      - loki
-    networks:
-      - net_default
-
-  netdata:
-    image: netdata/netdata
-    container_name: netdata
-    network_mode: host
-    restart: unless-stopped
-    pid: host
-    cap_add:
-      - SYS_PTRACE
-      - SYS_ADMIN
-    security_opt:
-      - apparmor:unconfined
-    volumes:
-      - netdataconfig:/etc/netdata
-      - netdatalib:/var/lib/netdata
-      - netdatacache:/var/cache/netdata
-      - /etc/passwd:/host/etc/passwd:ro
-      - /etc/group:/host/etc/group:ro
-      - /etc/localtime:/etc/localtime:ro
-      - /proc:/host/proc:ro
-      - /sys:/host/sys:ro
-      - /etc/os-release:/host/etc/os-release:ro
-      - /var/log:/host/var/log:ro
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-
-  # DEVELOPMENT TOOLS
-  sonarqube:
-    image: sonarqube:latest
-    container_name: sonarqube
-    links:
-      - azure-sql-edge:db
-    command: "-Dsonar.search.javaAdditionalOpts=-Dnode.store.allow_mmap=false"
-    environment:
-      SONAR_JDBC_USERNAME: ${MARIADB_SONAR_USERNAME}
-      SONAR_JDBC_PASSWORD: ${MARIADB_SONAR_PASSWORD}
-      SONAR_JDBC_URL: "jdbc:sqlserver://db:1433;databaseName=sonar;encrypt=true;trustServerCertificate=true;"
-      SONAR_ES_BOOTSTRAP_CHECKS_DISABLE: true
-    networks:
-      - net_default
-    # volumes: # Doesn't work idk why
-      # - ./sonarqube/data:/opt/sonarqube/data
-      # - ./sonarqube/extensions:/opt/sonarqube/extensions
-      # - ./sonarqube/logs:/opt/sonarqube/logs
-    depends_on:
-      - webserver
 
 networks:
   net_default:
@@ -184,10 +46,3 @@ volumes:
    driver: local
   mariadb:
    driver: local
-  box-files:
-   driver: local
-  grafana:
-   driver: local
-  netdatalib:
-  netdatacache:
-  netdataconfig:

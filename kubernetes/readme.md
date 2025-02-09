@@ -27,7 +27,20 @@ sudo install -m 755 kubeseal /usr/local/bin/kubeseal
 ## 3. Encrypting secrets
 
 ```sh
-kubeseal --controller-name=sealed-secrets --controller-namespace=kube-system < mysql-secret.yaml > mysql-sealed-secret.yaml`
+kubeseal --cert=sealed-secrets.crt --format=yaml < secret.yaml > sealedsecret.yaml
 ```
 
 > source : https://harsh05.medium.com/managing-secrets-in-gitops-a-deep-dive-into-kubernetes-secrets-and-sealed-secrets-f7f201eb5d60
+
+## Deletion Using kubectl
+
+To perform a non-cascade delete, make sure the finalizer is unset and then delete the app:
+```sh
+kubectl patch app APPNAME  -p '{"metadata": {"finalizers": null}}' --type merge
+kubectl delete app APPNAME
+```
+To perform a cascade delete set the finalizer, e.g. using kubectl patch:
+```sh
+kubectl patch app APPNAME  -p '{"metadata": {"finalizers": ["resources-finalizer.argocd.argoproj.io"]}}' --type merge
+kubectl delete app APPNAME
+```

@@ -6,11 +6,18 @@ metadata:
   labels:
     type: db
 spec:
-  type: NodePort # Exposes the service externally
-  selector:
-    app: mariadb
   ports:
-    - protocol: TCP
-      port: 3306 # Internal MariaDB port
-      targetPort: 3306 # Pod MariaDB port
-      nodePort: 32001 # External port (must be between 30000-32767)
+    - port: 3306 # Port sur lequel le Service écoute
+      targetPort: 3306 # Port sur lequel MariaDB écoute
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: mariadb
+  namespace: databases
+subsets:
+  - addresses:
+      - ip: 192.168.1.165 # Adresse IP de votre base de données MariaDB
+    ports:
+      - port: 3306 # Port sur lequel MariaDB écoute

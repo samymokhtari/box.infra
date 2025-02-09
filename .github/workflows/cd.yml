@@ -5,18 +5,13 @@ run-name: "Deploy to ${{ github.repo.name }} by @${{ github.actor }}"
 on:
   workflow_dispatch:
   push:
-    branches: [on-premise]
+    branches: [main]
 
 env:
   env: "production"
   dockercompose: "docker-compose.yml"
   script_install: "script_install.sh"
-  nginx_conf: "nginx/conf/default.conf"
-  grafana_conf: "grafana/*.yml"
-  scheduled_jobs: "scheduled_jobs/*.sh"
   backup2gdrive: "backup2gdrive/config.json"
-  docker_usr: ${{ vars.DOCKER_USER }}
-  docker_pwd: ${{ secrets.DOCKER_PASSWORD }}
 
 jobs:
   deploy-sources:
@@ -34,12 +29,12 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
-          source: ${{ env.script_install }}, ${{ env.dockercompose }}, ${{ env.nginx_conf }}, ${{ env.grafana_conf }}, ${{ env.scheduled_jobs }}, ${{ env.backup2gdrive }}
+          source: ${{ env.script_install }}, ${{ env.dockercompose }}, ${{ env.backup2gdrive }}
           overwrite : true
           target: ${{ env.FULLPATH }}
 
       - name: Give permissions to execute scripts
-        uses: appleboy/ssh-action@v1.2.0
+        uses: appleboy/ssh-action@v1.2.1
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
@@ -49,11 +44,9 @@ jobs:
             chmod +x ${{ env.FULLPATH }}/${{ env.script_install }}
             chmod +x ${{ env.FULLPATH }}/${{ env.dockercompose }}
             chmod +rwx ${{ env.FULLPATH }}/backup2gdrive
-            chmod +rwx ${{ env.FULLPATH }}/nginx
-            chmod +rwx ${{ env.FULLPATH }}/scheduled_jobs
 
       - name: Set environments variable in a file .env
-        uses: appleboy/ssh-action@v1.2.0
+        uses: appleboy/ssh-action@v1.2.1
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
@@ -66,35 +59,9 @@ jobs:
             echo "MSSQL_SA_PASSWORD=${{ secrets.DB_PASS }}" >> .env
             echo "MARIADB_ROOT_USERNAME=${{ secrets.DB_USER }}" >> .env
             echo "MARIADB_ROOT_PASSWORD=${{ secrets.DB_PASS }}" >> .env
-            echo "MARIADB_SONAR_USERNAME=${{ secrets.SONAR_DB_USER }}" >> .env
-            echo "MARIADB_SONAR_PASSWORD=${{ secrets.SONAR_DB_PASS }}" >> .env
-            echo "BOX_API_KEY=${{ secrets.BOX_API_KEY }}" >> .env
-
-      - name: Set credentials gcp for backup2gdrive
-        uses: appleboy/ssh-action@v1.2.0
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.SSH_PORT }}
-          script: |
-            cd ${{ env.FULLPATH }}/backup2gdrive
-            [ -e .env.backup2gdrive ] && rm .env.backup2gdrive
-            echo "ENV=${{ env.env }}" >> .env.backup2gdrive
-            echo "GOOGLE_SERVICE_ACCOUNT_JSON_PATH=${{ vars.GOOGLE_SERVICE_ACCOUNT_JSON_PATH }}" >> .env.backup2gdrive
-            
-            echo "${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}" > google-service-account.json
-            echo "Login Github Container Registry..."
-            docker login ghcr.io -u samymokhtari -p ${{ secrets.READ_CR_PAT_BOX }}
-            
-          
-      - name: Log to Docker Hub && Github Container Registry
-        run: |
-          echo "Login Docker Hub..."
-          docker login --username ${{ env.docker_usr }} --password ${{ env.docker_pwd }}
-
-      - name: Setup Machine and Deploy Docker
-        uses: appleboy/ssh-action@v1.2.0
+        
+      - name: Setup Machine and Deploy Docker Containers
+        uses: appleboy/ssh-action@v1.2.1
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
@@ -106,5 +73,4 @@ jobs:
             cd ${{ env.FULLPATH }} 
             docker compose pull
             docker compose up --detach --remove-orphans
-            docker exec webserver nginx -s reload
       

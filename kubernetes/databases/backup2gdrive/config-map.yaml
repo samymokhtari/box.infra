@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backup2gdrive-config
+  namespace: databases
+data:
+  config.json: |
+    {
+      "projectName": "PrivateCloud",
+      "usersEmails": [ "samy.mokhtari213@gmail.com"],
+      "daysToKeep": 7,
+      "pathsToBackup": [
+        {
+          "folderPath": "/backups/mariadb",
+          "filterFile": ".*\\.tar.gz$",
+          "zipName": "mariadb"
+        }
+      ],
+      "gDriveDestinationPath": ["Private Cloud Backups"]
+    }

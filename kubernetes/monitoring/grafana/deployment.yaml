@@ -22,6 +22,8 @@ spec:
       containers:
         - name: grafana
           image: grafana/grafana:11.5.1
+          securityContext:
+            allowPrivilegeEscalation: false
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 3000
@@ -55,4 +57,4 @@ spec:
       volumes:
         - name: grafana-storage
           persistentVolumeClaim:
-            claimName: pvc-grafana
+            claimName: grafana-pvc
