@@ -2,13 +2,13 @@ apiVersion: argoproj.io/v1alpha1
 kind: AppProject
 metadata:
   name: databases
-  namespace: argocd
 spec:
   description: Project for database-related applications
   sourceRepos:
     - https://github.com/samymokhtari/box.infra.git
   destinations:
     - server: https://kubernetes.default.svc
+      namespace: "*"
   clusterResourceWhitelist:
     - group: "*"
       kind: "*"
@@ -26,7 +26,6 @@ apiVersion: argoproj.io/v1alpha1
 kind: AppProject
 metadata:
   name: monitoring
-  namespace: argocd
 spec:
   description: Project for monitoring-related applications
   sourceRepos:
@@ -34,6 +33,7 @@ spec:
     - https://sonarsource.github.io/helm-chart-sonarqube
   destinations:
     - server: https://kubernetes.default.svc
+      namespace: "*"
   clusterResourceWhitelist:
     - group: "*"
       kind: "*"
@@ -45,13 +45,31 @@ apiVersion: argoproj.io/v1alpha1
 kind: AppProject
 metadata:
   name: apps
-  namespace: argocd
 spec:
   description: Project for application deployments
   sourceRepos:
     - https://github.com/samymokhtari/box.infra.git
   destinations:
     - server: https://kubernetes.default.svc
+      namespace: "*"
+  clusterResourceWhitelist:
+    - group: "*"
+      kind: "*"
+  namespaceResourceWhitelist:
+    - group: "*"
+      kind: "*"
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: shared
+spec:
+  description: Project for application deployments
+  sourceRepos:
+    - https://github.com/samymokhtari/box.infra.git
+  destinations:
+    - server: https://kubernetes.default.svc
+      namespace: "*"
   clusterResourceWhitelist:
     - group: "*"
       kind: "*"

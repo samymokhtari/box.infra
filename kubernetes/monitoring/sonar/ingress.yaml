@@ -2,7 +2,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: sonarqube-ingress
-  namespace: sonarqube
+  namespace: monitoring
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
     # traefik.ingress.kubernetes.io/router.middlewares: sonarqube-redirect-https@kubernetescrd  # Redirect HTTP to HTTPS

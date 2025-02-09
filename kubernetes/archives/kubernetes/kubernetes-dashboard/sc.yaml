@@ -1,0 +1,73 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  # The name of the role that you'll bind to the ServiceAccount
+  # You can name it something like "cluster-monitoring" for clarity
+  name: cluster-monitoring
+rules:
+  # Access to core Kubernetes resources (e.g., pods, services, namespaces, etc.)
+  - apiGroups: [""]
+    resources:
+      ["pods", "services", "namespaces", "configmaps", "endpoints", "events"]
+    verbs: ["get", "list", "watch"]
+
+  # Access to deployments, replicasets, and statefulsets (in the apps group)
+  - apiGroups: ["apps"]
+    resources: ["deployments", "replicasets", "statefulsets"]
+    verbs: ["get", "list", "watch"]
+
+  # Access to nodes, persistent volumes, and storage classes
+  - apiGroups: [""]
+    resources: ["nodes", "persistentvolumes", "storageclasses"]
+    verbs: ["get", "list", "watch"]
+
+  # Access to logs of pods
+  - apiGroups: [""]
+    resources: ["pods/log"]
+    verbs: ["get", "list", "watch"]
+
+  # Access to network-related resources
+  - apiGroups: ["networking.k8s.io"]
+    resources: ["ingresses", "networkpolicies"]
+    verbs: ["get", "list", "watch"]
+
+  # Access to custom metrics (if you use metrics-server or Prometheus)
+  - apiGroups: ["metrics.k8s.io"]
+    resources: ["pods", "nodes"]
+    verbs: ["get", "list", "watch"]
+
+  # Access to custom resources, if you have any CRDs (Custom Resource Definitions)
+  - apiGroups: ["apiextensions.k8s.io"]
+    resources: ["customresourcedefinitions"]
+    verbs: ["get", "list", "watch"]
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: monitor-sc
+  namespace: kubernetes-dashboard
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  # The name of the ClusterRoleBinding
+  name: cluster-monitoring-binding
+subjects:
+  - kind: ServiceAccount
+    name: monitor-sc # The name of your service account
+    namespace: kubernetes-dashboard # The namespace where the service account exists
+roleRef:
+  kind: ClusterRole
+  name: cluster-monitoring # The name of the ClusterRole we just created
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: monitor-sc-token
+  namespace: kubernetes-dashboard
+  annotations:
+    kubernetes.io/service-account.name: monitor-sc
+type: kubernetes.io/service-account-token
+# kubectl describe secrets/monitor-sc-token -n kubernetes-dashboard
