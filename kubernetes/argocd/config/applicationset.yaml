@@ -26,7 +26,7 @@ spec:
         namespace: databases
       source:
         repoURL: https://github.com/samymokhtari/box.infra.git
-        targetRevision: ISSUE-40
+        targetRevision: main
         path: "{{path}}"
       syncPolicy:
         syncOptions:
@@ -65,7 +65,7 @@ spec:
         namespace: monitoring
       source:
         repoURL: https://github.com/samymokhtari/box.infra.git
-        targetRevision: ISSUE-40
+        targetRevision: main
         path: "{{path}}"
       syncPolicy:
         syncOptions:
@@ -98,7 +98,7 @@ spec:
         namespace: apps
       source:
         repoURL: https://github.com/samymokhtari/box.infra.git
-        targetRevision: ISSUE-40
+        targetRevision: main
         path: "{{path}}"
       syncPolicy:
         syncOptions:
@@ -132,7 +132,7 @@ spec:
         namespace: apps
       source:
         repoURL: https://github.com/samymokhtari/box.infra.git
-        targetRevision: ISSUE-40
+        targetRevision: main
         path: "{{path}}"
       syncPolicy:
         syncOptions:

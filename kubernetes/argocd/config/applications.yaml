@@ -14,7 +14,7 @@ spec:
   sources:
     - repoURL: https://github.com/samymokhtari/box.infra.git
       path: kubernetes/argocd
-      targetRevision: ISSUE-40
+      targetRevision: main
   syncPolicy:
     automated:
       prune: true
@@ -36,7 +36,7 @@ spec:
   sources:
     - repoURL: https://github.com/samymokhtari/box.infra.git
       path: kubernetes/letsencrypt
-      targetRevision: ISSUE-40
+      targetRevision: main
   syncPolicy:
     syncOptions:
       - CreateNamespace=true
