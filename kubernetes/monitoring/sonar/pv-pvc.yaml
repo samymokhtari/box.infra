@@ -2,7 +2,8 @@ apiVersion: v1
 kind: PersistentVolume
 metadata:
   name: sonarqube-pv
-  namespace: monitoring
+  labels:
+    app: sonar
 spec:
   capacity:
     storage: 10Gi
@@ -15,7 +16,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: sonarqube-pvc
-  namespace: sonarqube
+  namespace: monitoring
 spec:
   accessModes:
     - ReadWriteOnce

@@ -12,10 +12,10 @@ spec:
   ingressClassName: traefik
   tls:
     - hosts:
-        - k3sgrafana.smokhtari.com
+        - grafana.smokhtari.com
       secretName: grafana-tls
   rules:
-    - host: k3sgrafana.smokhtari.com
+    - host: grafana.smokhtari.com
       http:
         paths:
           - path: /

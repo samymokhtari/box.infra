@@ -3,7 +3,6 @@ kind: Deployment
 metadata:
   name: box-api
 spec:
-  replicas: 1
   selector:
     matchLabels:
       app: box-api
@@ -14,12 +13,25 @@ spec:
     spec:
       containers:
         - name: box-api
-          image: samy266/box:latest
+          image: samy266/box:3675af0 # Manage better versionning
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
           ports:
             - containerPort: 80
           env:
             - name: ASPNETCORE_ENVIRONMENT
               value: "Production"
+            - name: ASPNETCORE_URLS
+              value: http://+:80
             - name: API_KEY
               valueFrom:
                 secretKeyRef:
@@ -28,5 +40,5 @@ spec:
             - name: ConnStr
               valueFrom:
                 secretKeyRef:
-                  name: db-secrets
-                  key: ConnStr
+                  name: box-secrets
+                  key: DB_CONN_STR

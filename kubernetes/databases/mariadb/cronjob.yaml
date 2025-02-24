@@ -1,0 +1,60 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: mariadb-backup
+spec:
+  schedule: "0 2 * * *" # Runs every day at 2 AM
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: mariadb-backup
+              image: registry.gitlab.com/ix.ai/mariadb-backup:v0.2.6
+              securityContext:
+                allowPrivilegeEscalation: false
+              env:
+                - name: DB_HOST
+                  value: mariadb.databases.svc.cluster.local
+                - name: DB_PASS
+                  valueFrom:
+                    secretKeyRef:
+                      name: mariadb-secrets
+                      key: DB_PASSWORD
+              volumeMounts:
+                - name: backup-storage
+                  mountPath: /backup
+          volumes:
+            - name: backup-storage
+              persistentVolumeClaim:
+                claimName: mariadb-backups-pvc
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: mariadb-backup-cleanup
+spec:
+  schedule: "0 3 * * *" # Runs every day at 3 AM
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: cleanup
+              image: alpine
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  echo "Deleting old backups..."
+                  ls -t /backup/*.tar.gz | tail -n +6 | xargs rm -f
+                  echo "Cleanup complete."
+              volumeMounts:
+                - name: backup-storage
+                  mountPath: /backup
+          volumes:
+            - name: backup-storage
+              persistentVolumeClaim:
+                claimName: mariadb-backups-pvc

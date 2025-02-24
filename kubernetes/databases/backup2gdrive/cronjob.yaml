@@ -1,0 +1,56 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: backup2gdrive
+  namespace: databases
+spec:
+  schedule: "0 6 * * *" # Runs every day at 6 AM
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: backup2gdrive
+              image: ghcr.io/fivekage/backup2gdrive
+              workingDir: /app
+              securityContext:
+                allowPrivilegeEscalation: false
+              env:
+                - name: ENV
+                  value: production
+                - name: GOOGLE_SERVICE_ACCOUNT_JSON_PATH
+                  value: /app/config/google-service-account.json
+
+              volumeMounts:
+                - name: backup-storage
+                  mountPath: /backups
+                - name: gdrive-credentials
+                  mountPath: /app/config
+                  subPath: google-service-account.json
+                - name: backup2gdrive-config
+                  mountPath: /app/config/config.json
+                  subPath: config.json
+              resources:
+                requests:
+                  memory: "256Mi"
+                  cpu: "250m"
+                limits:
+                  memory: "512Mi"
+                  cpu: "500m"
+          volumes:
+            - name: backup-storage
+              persistentVolumeClaim:
+                claimName: mariadb-backups-pvc
+            - name: gdrive-credentials
+              secret:
+                secretName: gdrive-credentials
+                items:
+                  - key: google-service-account.json
+                    path: google-service-account.json
+            - name: backup2gdrive-config
+              configMap:
+                name: backup2gdrive-config
+                items:
+                  - key: config.json
+                    path: config.json

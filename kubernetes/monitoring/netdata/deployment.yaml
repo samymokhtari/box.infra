@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: netdata
+  namespace: monitoring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: netdata
+  template:
+    metadata:
+      labels:
+        app: netdata
+    spec:
+      containers:
+        - name: netdata
+          image: netdata/netdata:v2.2.5
+          securityContext:
+            allowPrivilegeEscalation: false
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "250m"
+              memory: "512Mi"
+          env:
+            - name: NETDATA_WEB_MODE
+              value: "none" # Disable UI web
+            - name: NETDATA_CLAIM_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: netdata-secrets
+                  key: NETDATA_CLAIM_TOKEN
+            - name: NETDATA_CLAIM_ROOMS
+              value: "77b3beab-2904-42cd-ab7a-d4f7c905d729"
+            - name: NETDATA_CLAIM_URL
+              value: "https://app.netdata.cloud"
+          ports:
+            - containerPort: 19999
+          volumeMounts:
+            - name: config
+              mountPath: /etc/netdata
+            - name: config-file
+              mountPath: /etc/netdata/netdata.conf
+              subPath: netdata.conf
+            - name: cache
+              mountPath: /var/cache/netdata
+            - name: lib
+              mountPath: /var/lib/netdata
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: netdata-config-pvc
+        - name: config-file
+          configMap:
+            name: netdata-config
+            items:
+              - key: netdata.conf
+                path: netdata.conf
+        - name: cache
+          persistentVolumeClaim:
+            claimName: netdata-cache-pvc
+        - name: lib
+          persistentVolumeClaim:
+            claimName: netdata-lib-pvc

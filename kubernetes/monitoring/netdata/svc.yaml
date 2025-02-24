@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: netdata
+  namespace: monitoring
+spec:
+  selector:
+    app: netdata
+  ports:
+    - protocol: TCP
+      port: 19999 # Port sur lequel Netdata écoute
+      targetPort: 19999

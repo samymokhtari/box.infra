@@ -1,26 +1,24 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: sonarqube-ingress
+  name: sonarqube
   namespace: monitoring
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
-    # traefik.ingress.kubernetes.io/router.middlewares: sonarqube-redirect-https@kubernetescrd  # Redirect HTTP to HTTPS
-    cert-manager.io/cluster-issuer: "letsencrypt-prod"
 spec:
   ingressClassName: traefik
   rules:
-    - host: k3ssonar.smokhtari.com
+    - host: sonar.smokhtari.com
       http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: sonarqube-sonarqube
+                name: sonarqube
                 port:
                   number: 9000
   tls: # Enable HTTPS
     - hosts:
-        - k3ssonar.smokhtari.com
+        - sonar.smokhtari.com
       secretName: sonarqube-tls # TLS Certificate

@@ -1,27 +1,25 @@
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: grafana-pv
+  name: prometheus-pv
   labels:
-    app: grafana
+    app: prometheus
 spec:
   capacity:
-    storage: 1Gi
+    storage: 5Gi
   accessModes:
     - ReadWriteOnce
   hostPath:
-    path: "/mnt/data/grafana"
+    path: /mnt/data/prometheus
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: grafana-pvc
+  name: prometheus-pvc
   namespace: monitoring
-  labels:
-    app: grafana
 spec:
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 1Gi
+      storage: 5Gi
