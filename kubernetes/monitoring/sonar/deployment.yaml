@@ -1,0 +1,92 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sonarqube
+  namespace: monitoring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sonarqube
+  template:
+    metadata:
+      labels:
+        app: sonarqube
+    spec:
+      containers:
+        - name: sonarqube
+          image: sonarqube:latest
+          securityContext:
+            allowPrivilegeEscalation: false
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
+          ports:
+            - containerPort: 9000
+          env:
+            - name: SONAR_WEB_JAVA_OPTS
+              valueFrom:
+                configMapKeyRef:
+                  name: sonar-config
+                  key: SONAR_WEB_JAVA_OPTS
+            - name: SONAR_SEARCH_JAVA_OPTS
+              valueFrom:
+                configMapKeyRef:
+                  name: sonar-config
+                  key: SONAR_SEARCH_JAVA_OPTS
+            - name: sonar.search.shards
+              valueFrom:
+                configMapKeyRef:
+                  name: sonar-config
+                  key: sonar.search.shards
+            - name: sonar.search.replicas
+              valueFrom:
+                configMapKeyRef:
+                  name: sonar-config
+                  key: sonar.search.replicas
+            - name: SONAR_ES_BOOTSTRAP_CHECKS_DISABLE
+              valueFrom:
+                configMapKeyRef:
+                  name: sonar-config
+                  key: SONAR_ES_BOOTSTRAP_CHECKS_DISABLE
+            - name: SONAR_SEARCH_JAVAADDITIONALOPTS
+              valueFrom:
+                configMapKeyRef:
+                  name: sonar-config
+                  key: SONAR_SEARCH_JAVAADDITIONALOPTS
+            - name: MONITORING_PASSCODE
+              valueFrom:
+                secretKeyRef:
+                  name: sonar-secrets
+                  key: MONITORING_PASSCODE
+            - name: EDITION
+              valueFrom:
+                configMapKeyRef:
+                  name: sonar-config
+                  key: EDITION
+            - name: SONAR_JDBC_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: sonar-secrets
+                  key: SONAR_JDBC_USERNAME
+            - name: SONAR_JDBC_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: sonar-secrets
+                  key: SONAR_JDBC_PASSWORD
+            - name: SONAR_JDBC_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: sonar-config
+                  key: SONAR_JDBC_URL
+          volumeMounts:
+            - mountPath: "/opt/sonarqube/data"
+              name: sonarqube-data
+      volumes:
+        - name: sonarqube-data
+          persistentVolumeClaim:
+            claimName: sonarqube-pvc

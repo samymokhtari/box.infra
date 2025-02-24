@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: sonarqube
+  namespace: monitoring
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: sonar.smokhtari.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: sonarqube
+                port:
+                  number: 9000
+  tls: # Enable HTTPS
+    - hosts:
+        - sonar.smokhtari.com
+      secretName: sonarqube-tls # TLS Certificate

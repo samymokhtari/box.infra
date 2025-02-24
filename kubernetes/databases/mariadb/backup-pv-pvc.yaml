@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mariadb-backups-pv
+  labels:
+    type: db
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce # Allows multiple pods to read and write to the volume
+  storageClassName: local-path
+  hostPath:
+    path: "/mnt/data/mariadb-backups" # Directory on the host node where backups will be stored
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mariadb-backups-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce # Must match the PV access mode
+  resources:
+    requests:
+      storage: 5Gi # Must match the PV capacity
+  volumeName: mariadb-backups-pv
+  storageClassName: local-path

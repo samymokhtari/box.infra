@@ -1,0 +1,105 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: muslimbot
+  labels:
+    app: muslimbot
+    type: app
+spec:
+  replicas: 1 # Must be 1
+  selector:
+    matchLabels:
+      app: muslimbot
+  template:
+    metadata:
+      labels:
+        app: muslimbot
+    spec:
+      imagePullSecrets:
+        - name: gchr-secrets
+      containers:
+        - name: muslimbot
+          image: ghcr.io/fivekage/muslimbot:1.2.11
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            requests:
+              cpu: "200m"
+              memory: "256Mi"
+            limits:
+              cpu: "600m"
+              memory: "728Mi"
+          env:
+            - name: NODE_ENV
+              value: production
+            - name: DISCORD_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: muslimbot-secrets
+                  key: DISCORD_TOKEN
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: muslimbot-secrets
+                  key: DB_PASSWORD
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: muslimbot-secrets
+                  key: DB_USERNAME
+            - name: CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: muslimbot-secrets
+                  key: CLIENT_ID
+            - name: DB_HOST
+              value: mariadb.databases.svc.cluster.local
+            - name: DB_DATABASE
+              value: muslimbot
+            - name: HADITH_API_URL
+              value: https://random-hadith-generator.vercel.app/
+            - name: HADITH_SCHEDULE_HOUR
+              value: "10"
+            - name: HADITH_SCHEDULE_MINUTE
+              value: "0"
+            - name: PRAYER_SCHEDULE_RULE
+              value: "0 */2 * * *"
+          volumeMounts:
+            - name: quran-volume
+              mountPath: /usr/src/bot/quran
+              readOnly: true
+            - name: logs-volume
+              mountPath: /usr/src/bot/logs
+
+        # Sidecar container for logging (Fluent Bit)
+        - name: fluent-bit
+          image: fluent/fluent-bit:3.2.5
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            requests:
+              cpu: "50m"
+            limits:
+              cpu: "250m"
+          volumeMounts:
+            - name: logs-volume
+              mountPath: /fluent-bit/logs # Fluent Bit lit les logs ici
+            - name: fluent-bit-config
+              mountPath: /fluent-bit/etc
+          env:
+            - name: LOKI_URL
+              value: "http://loki.monitoring.svc.cluster.local:3100/loki/api/v1/push"
+      volumes:
+        - name: quran-volume
+          hostPath:
+            path: /home/sm/quran # NFS path
+            type: Directory
+        - name: logs-volume
+          emptyDir: {} # Volume partagé entre MuslimBot et Fluent Bit
+        - name: fluent-bit-config
+          configMap:
+            name: fluent-bit-config

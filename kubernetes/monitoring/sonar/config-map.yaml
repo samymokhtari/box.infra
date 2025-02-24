@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sonar-config
+  namespace: monitoring
+data:
+  SONAR_ES_BOOTSTRAP_CHECKS_DISABLE: "true"
+  SONAR_WEB_JAVA_OPTS: "-Xms256m -Xmx512m"
+  SONAR_SEARCH_JAVAADDITIONALOPTS: "-Dnode.store.allow_mmap=false -Xms256m -Xmx512m"
+  SONAR_SEARCH_JAVA_OPTS: "-Xms256m -Xmx512m -Dnode.store.allow_mmap=false"
+  EDITION: "developer"
+  SONAR_JDBC_URL: "jdbc:sqlserver://azuresql.databases.svc.cluster.local:1433;databaseName=sonar;encrypt=false;trustServerCertificate=true"
+  sonar.search.shards: "1"
+  sonar.search.replicas: "0"

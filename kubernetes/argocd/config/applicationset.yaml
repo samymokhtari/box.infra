@@ -1,0 +1,142 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: databases
+  namespace: argocd
+spec:
+  generators:
+    - list:
+        elements:
+          - name: mariadb
+            path: kubernetes/databases/mariadb
+          - name: azuresql
+            path: kubernetes/databases/azuresql
+          - name: backup2gdrive
+            path: kubernetes/databases/backup2gdrive
+  template:
+    metadata:
+      name: "{{name}}"
+      labels:
+        app: "{{name}}"
+        env: production
+    spec:
+      project: databases
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: databases
+      source:
+        repoURL: https://github.com/samymokhtari/box.infra.git
+        targetRevision: main
+        path: "{{path}}"
+      syncPolicy:
+        syncOptions:
+          - CreateNamespace=true
+        automated:
+          prune: true
+          selfHeal: true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: monitoring
+  namespace: argocd
+spec:
+  generators:
+    - list:
+        elements:
+          - name: grafana
+            path: kubernetes/monitoring/grafana
+          - name: prometheus
+            path: kubernetes/monitoring/prometheus
+          - name: loki
+            path: kubernetes/monitoring/loki
+          - name: netdata
+            path: kubernetes/monitoring/netdata
+  template:
+    metadata:
+      name: "{{name}}"
+      labels:
+        app: "{{name}}"
+        env: production
+    spec:
+      project: monitoring
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: monitoring
+      source:
+        repoURL: https://github.com/samymokhtari/box.infra.git
+        targetRevision: main
+        path: "{{path}}"
+      syncPolicy:
+        syncOptions:
+          - CreateNamespace=true
+        automated:
+          prune: true
+          selfHeal: true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: muslimbot
+  namespace: argocd
+spec:
+  generators:
+    - list:
+        elements:
+          - name: muslimbot
+            path: kubernetes/apps/muslimbot
+  template:
+    metadata:
+      name: "{{name}}"
+      labels:
+        app: "{{name}}"
+        env: production
+    spec:
+      project: apps
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: apps
+      source:
+        repoURL: https://github.com/samymokhtari/box.infra.git
+        targetRevision: main
+        path: "{{path}}"
+      syncPolicy:
+        syncOptions:
+          - CreateNamespace=true
+        automated:
+          prune: true
+          selfHeal: true
+
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: box
+  namespace: argocd
+spec:
+  generators:
+    - list:
+        elements:
+          - name: box
+            path: kubernetes/apps/box
+  template:
+    metadata:
+      name: "{{name}}"
+      labels:
+        app: "{{name}}"
+        env: production
+    spec:
+      project: apps
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: apps
+      source:
+        repoURL: https://github.com/samymokhtari/box.infra.git
+        targetRevision: main
+        path: "{{path}}"
+      syncPolicy:
+        syncOptions:
+          - CreateNamespace=true
+        automated:
+          prune: true
+          selfHeal: true

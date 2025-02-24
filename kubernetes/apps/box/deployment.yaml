@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: box-api
+spec:
+  selector:
+    matchLabels:
+      app: box-api
+  template:
+    metadata:
+      labels:
+        app: box-api
+    spec:
+      containers:
+        - name: box-api
+          image: samy266/box:3675af0 # Manage better versionning
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          ports:
+            - containerPort: 80
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: "Production"
+            - name: ASPNETCORE_URLS
+              value: http://+:80
+            - name: API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: box-secrets
+                  key: BOX_API_KEY
+            - name: ConnStr
+              valueFrom:
+                secretKeyRef:
+                  name: box-secrets
+                  key: DB_CONN_STR
