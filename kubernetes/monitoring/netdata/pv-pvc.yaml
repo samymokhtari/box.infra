@@ -9,6 +9,7 @@ spec:
     storage: 1Gi
   accessModes:
     - ReadWriteOnce
+  storageClassName: local-path
   hostPath:
     path: /mnt/data/netdata/config
 ---
@@ -35,6 +36,7 @@ spec:
     storage: 2Gi
   accessModes:
     - ReadWriteOnce
+  storageClassName: local-path
   hostPath:
     path: /mnt/data/netdata/cache
 ---
@@ -61,6 +63,7 @@ spec:
     storage: 2Gi
   accessModes:
     - ReadWriteOnce
+  storageClassName: local-path
   hostPath:
     path: /mnt/data/netdata/lib
 ---
