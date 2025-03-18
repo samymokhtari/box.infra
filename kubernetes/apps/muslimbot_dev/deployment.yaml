@@ -1,24 +1,24 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: muslimbot
+  name: muslimbot_dev
   labels:
-    app: muslimbot
+    app: muslimbot_dev
     type: app
 spec:
   replicas: 1 # Must be 1
   selector:
     matchLabels:
-      app: muslimbot
+      app: muslimbot_dev
   template:
     metadata:
       labels:
-        app: muslimbot
+        app: muslimbot_dev
     spec:
       imagePullSecrets:
         - name: gchr-secrets
       containers:
-        - name: muslimbot
+        - name: muslimbot_dev
           image: ghcr.io/fivekage/muslimbot:1.2.11
           securityContext:
             allowPrivilegeEscalation: false
@@ -26,38 +26,38 @@ spec:
               drop: ["ALL"]
           resources:
             requests:
-              cpu: "200m"
+              cpu: "100m"
               memory: "256Mi"
             limits:
-              cpu: "600m"
-              memory: "728Mi"
+              cpu: "300m"
+              memory: "512Mi"
           env:
             - name: NODE_ENV
-              value: production
+              value: development
             - name: DISCORD_TOKEN
               valueFrom:
                 secretKeyRef:
-                  name: muslimbot-secrets
+                  name: muslimbotdev-secrets
                   key: DISCORD_TOKEN
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: muslimbot-secrets
+                  name: muslimbotdev-secrets
                   key: DB_PASSWORD
             - name: DB_USERNAME
               valueFrom:
                 secretKeyRef:
-                  name: muslimbot-secrets
+                  name: muslimbotdev-secrets
                   key: DB_USERNAME
             - name: CLIENT_ID
               valueFrom:
                 secretKeyRef:
-                  name: muslimbot-secrets
+                  name: muslimbotdev-secrets
                   key: CLIENT_ID
             - name: DB_HOST
               value: mariadb.databases.svc.cluster.local
             - name: DB_DATABASE
-              value: muslimbot
+              value: muslimbot_dev
             - name: HADITH_API_URL
               value: https://random-hadith-generator.vercel.app/
             - name: HADITH_SCHEDULE_HOUR
@@ -121,7 +121,7 @@ spec:
             type: Directory
         - name: logs-volume
           persistentVolumeClaim:
-            claimName: muslimbot-pvc # Shared volume between fluent-bit and muslimbot
+            claimName: muslimbotdev-pvc # Shared volume between fluent-bit and muslimbot
         - name: fluent-bit-config
           configMap:
             name: fluent-bit-config

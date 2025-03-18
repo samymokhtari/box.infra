@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: muslimbot-pv
+  labels:
+    app: muslimbot
+spec:
+  capacity:
+    storage: 2Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/mnt/data/muslimbot"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: muslimbot-pvc
+  namespace: apps
+  labels:
+    app: muslimbot
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
