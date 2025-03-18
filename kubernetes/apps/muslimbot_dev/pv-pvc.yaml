@@ -6,7 +6,7 @@ metadata:
     app: muslimbotdev
 spec:
   capacity:
-    storage: 2Gi
+    storage: 1Gi
   accessModes:
     - ReadWriteOnce
   hostPath:

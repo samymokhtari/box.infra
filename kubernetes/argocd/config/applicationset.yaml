@@ -86,7 +86,7 @@ spec:
           - name: muslimbot
             path: kubernetes/apps/muslimbot
             branch: main
-          - name: muslimbot_dev
+          - name: muslimbot-dev
             path: kubernetes/apps/muslimbot_dev
             branch: dev
   template:
