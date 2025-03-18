@@ -1,24 +1,24 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: muslimbot_dev
+  name: muslimbot-dev
   labels:
-    app: muslimbot_dev
+    app: muslimbot-dev
     type: app
 spec:
   replicas: 1 # Must be 1
   selector:
     matchLabels:
-      app: muslimbot_dev
+      app: muslimbot-dev
   template:
     metadata:
       labels:
-        app: muslimbot_dev
+        app: muslimbot-dev
     spec:
       imagePullSecrets:
         - name: gchr-secrets
       containers:
-        - name: muslimbot_dev
+        - name: muslimbot-dev
           image: ghcr.io/fivekage/muslimbot:1.2.11
           securityContext:
             allowPrivilegeEscalation: false
@@ -57,7 +57,7 @@ spec:
             - name: DB_HOST
               value: mariadb.databases.svc.cluster.local
             - name: DB_DATABASE
-              value: muslimbot_dev
+              value: muslimbot-dev
             - name: HADITH_API_URL
               value: https://random-hadith-generator.vercel.app/
             - name: HADITH_SCHEDULE_HOUR
