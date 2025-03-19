@@ -26,10 +26,10 @@ spec:
               drop: ["ALL"]
           resources:
             requests:
-              cpu: "200m"
+              cpu: "300m"
               memory: "256Mi"
             limits:
-              cpu: "300m"
+              cpu: "500m"
               memory: "512Mi"
           env:
             - name: NODE_ENV

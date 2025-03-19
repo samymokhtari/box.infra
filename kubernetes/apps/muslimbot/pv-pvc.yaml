@@ -9,6 +9,7 @@ spec:
     storage: 2Gi
   accessModes:
     - ReadWriteOnce
+  storageClassName: local-path
   hostPath:
     path: "/mnt/data/muslimbot"
 ---
