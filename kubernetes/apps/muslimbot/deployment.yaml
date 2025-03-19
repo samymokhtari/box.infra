@@ -26,11 +26,11 @@ spec:
               drop: ["ALL"]
           resources:
             requests:
-              cpu: "300m"
+              cpu: "200m"
               memory: "256Mi"
             limits:
-              cpu: "1"
-              memory: "1024Mi"
+              cpu: "500m"
+              memory: "728Mi"
           env:
             - name: NODE_ENV
               value: production
@@ -103,9 +103,9 @@ spec:
               drop: ["ALL"]
           resources:
             requests:
-              cpu: "50m"
+              cpu: "25m"
             limits:
-              cpu: "250m"
+              cpu: "150m"
           volumeMounts:
             - name: logs-volume
               mountPath: /fluent-bit/logs # Fluent Bit lit les logs ici
