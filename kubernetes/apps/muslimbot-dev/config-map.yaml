@@ -12,7 +12,7 @@ data:
     [INPUT]
         Name              tail
         Path              /fluent-bit/logs/application.log
-        Tag               kubernetes.muslimbot
+        Tag               kubernetes.muslimbot-dev
         Mem_Buf_Limit     5MB
         Skip_Long_Lines   On
 
@@ -21,4 +21,4 @@ data:
         Match           kubernetes.*
         Host            loki.monitoring.svc.cluster.local
         Port            3100
-        Labels          job=muslimbot
+        Labels          job=muslimbot-dev

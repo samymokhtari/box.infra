@@ -85,6 +85,10 @@ spec:
         elements:
           - name: muslimbot
             path: kubernetes/apps/muslimbot
+            branch: main
+          - name: muslimbot-dev
+            path: kubernetes/apps/muslimbot-dev
+            branch: dev
   template:
     metadata:
       name: "{{name}}"
@@ -98,7 +102,7 @@ spec:
         namespace: apps
       source:
         repoURL: https://github.com/samymokhtari/box.infra.git
-        targetRevision: main
+        targetRevision: "{{branch}}"
         path: "{{path}}"
       syncPolicy:
         syncOptions:

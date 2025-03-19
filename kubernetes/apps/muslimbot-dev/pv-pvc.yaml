@@ -1,26 +1,28 @@
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: sonarqube-pv
+  name: muslimbotdev-pv
   labels:
-    app: sonar
+    app: muslimbotdev
 spec:
   capacity:
-    storage: 10Gi
+    storage: 1Gi
   accessModes:
     - ReadWriteOnce
   storageClassName: local-path
   hostPath:
-    path: /mnt/data/sonarqube
+    path: "/mnt/data/muslimbotdev"
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: sonarqube-pvc
-  namespace: monitoring
+  name: muslimbotdev-pvc
+  namespace: apps
+  labels:
+    app: muslimbotdev
 spec:
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 10Gi
+      storage: 1Gi
