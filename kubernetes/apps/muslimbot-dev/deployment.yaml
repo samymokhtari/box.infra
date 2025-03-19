@@ -19,7 +19,7 @@ spec:
         - name: gchr-secrets
       containers:
         - name: muslimbot-dev
-          image: ghcr.io/fivekage/muslimbot:1.2.11
+          image: ghcr.io/fivekage/muslimbot:dev
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:

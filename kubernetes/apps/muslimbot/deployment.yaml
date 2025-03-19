@@ -72,27 +72,6 @@ spec:
               readOnly: true
             - name: logs-volume
               mountPath: /usr/src/bot/logs
-          livenessProbe:
-            exec:
-              command:
-                - cat
-                - /tmp/startup-probe
-            initialDelaySeconds: 10
-            periodSeconds: 10
-          readinessProbe:
-            exec:
-              command:
-                - cat
-                - /tmp/readiness-probe
-            initialDelaySeconds: 5
-            periodSeconds: 10
-          startupProbe:
-            exec:
-              command:
-                - cat
-                - /tmp/startup-probe
-            failureThreshold: 30
-            periodSeconds: 5
 
         # Sidecar container for logging (Fluent Bit)
         - name: fluent-bit
