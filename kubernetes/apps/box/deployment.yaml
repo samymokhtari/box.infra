@@ -20,10 +20,10 @@ spec:
               drop: ["ALL"]
           resources:
             requests:
-              cpu: "10m"
+              cpu: "5m"
               memory: "64Mi"
             limits:
-              cpu: "200m"
+              cpu: "100m"
               memory: "256Mi"
           ports:
             - containerPort: 80

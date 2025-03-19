@@ -5,6 +5,7 @@ metadata:
   namespace: databases
 spec:
   schedule: "0 6 * * *" # Runs every day at 6 AM
+  suspend: true
   jobTemplate:
     spec:
       template:
