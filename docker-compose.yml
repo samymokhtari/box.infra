@@ -14,7 +14,7 @@ services:
       ACCEPT_EULA: "Y"
       MSSQL_PID: "Developer"
     volumes:
-      - sqlserver:/var/opt/mssql/
+      - box_sqlserver:/var/opt/mssql/
       - /backups/mssql:/var/opt/mssql/backups
     networks:
       - net_default
@@ -41,7 +41,7 @@ networks:
     name: net_default
 
 volumes:
-  sqlserver:
-    driver: local
-  mariadb:
-    driver: local
+  box_sqlserver:
+    external: true
+  box_mariadb:
+    external: true
