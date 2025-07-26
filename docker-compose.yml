@@ -6,12 +6,12 @@ services:
     container_name: azure-sql-edge
     user: root
     restart: always
-    image:  mcr.microsoft.com/azure-sql-edge:latest # OR mcr.microsoft.com/mssql/server
+    image: mcr.microsoft.com/azure-sql-edge:2.0.0 # OR mcr.microsoft.com/mssql/server
     ports:
       - "1433:1433"
     environment:
       MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD} # example: yourStrong(!)Password
-      ACCEPT_EULA: 'Y'
+      ACCEPT_EULA: "Y"
       MSSQL_PID: "Developer"
     volumes:
       - sqlserver:/var/opt/mssql/
@@ -21,7 +21,7 @@ services:
 
   mariadb:
     container_name: mariadb
-    image: mariadb:latest
+    image: mariadb:lts
     restart: always
     volumes:
       - mariadb:/var/lib/mysql
@@ -32,10 +32,9 @@ services:
     labels:
       mariadb-backup: "true"
     ports:
-      - '3306:3306'
+      - "3306:3306"
     networks:
       - net_default
-
 
 networks:
   net_default:
@@ -43,6 +42,6 @@ networks:
 
 volumes:
   sqlserver:
-   driver: local
+    driver: local
   mariadb:
-   driver: local
+    driver: local
