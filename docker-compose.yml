@@ -9,6 +9,8 @@ services:
     image: mcr.microsoft.com/azure-sql-edge:2.0.0 # OR mcr.microsoft.com/mssql/server
     ports:
       - "1433:1433"
+    labels:
+      backup: "true"
     environment:
       MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD} # example: yourStrong(!)Password
       ACCEPT_EULA: "Y"
@@ -24,13 +26,13 @@ services:
     image: mariadb:lts
     restart: always
     volumes:
-      - mariadb:/var/lib/mysql
+      - box_mariadb:/var/lib/mysql
     environment:
       MARIADB_USER: ${MARIADB_ROOT_USERNAME}
       MARIADB_PASSWORD: ${MARIADB_ROOT_PASSWORD}
       MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD}
     labels:
-      mariadb-backup: "true"
+      backup: "true"
     ports:
       - "3306:3306"
     networks:
