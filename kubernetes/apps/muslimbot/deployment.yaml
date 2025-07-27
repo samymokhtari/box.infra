@@ -58,8 +58,11 @@ spec:
               value: mariadb.databases.svc.cluster.local
             - name: DB_DATABASE
               value: muslimbot
-            - name: HADITH_API_URL
-              value: https://random-hadith-generator.vercel.app/
+            - name: HADITH_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: muslimbot-secrets
+                  key: HADITH_API_KEY
             - name: HADITH_SCHEDULE_HOUR
               value: "10"
             - name: HADITH_SCHEDULE_MINUTE
